@@ -88,9 +88,11 @@ int main(void)
 	// }
 
 
+	
+	end = clock();
+
 	/* Finalize work with clBLAS */
 	clblasTeardown();
-	end = clock();
 
 	std::cout << "time on gpu = " << end - start<<std::endl;
 
