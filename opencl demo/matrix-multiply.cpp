@@ -33,6 +33,11 @@ int main(void)
 	compute::vector<float> res(size*size, context);
 	clock_t start, end;
 
+/* Setup clBLAS */
+	err = clblasSetup();
+	cl_event event = NULL;
+
+
 	start = clock();
 
 	compute::copy(
@@ -49,10 +54,7 @@ int main(void)
 		queue
 	);
 
-	/* Setup clBLAS */
-	err = clblasSetup();
-	cl_event event = NULL;
-
+	
 
 	/* Call clBLAS extended function. Perform gemm for the lower right sub-matrices */
 	err = clblasSgemm(clblasRowMajor, clblasNoTrans, clblasNoTrans,
