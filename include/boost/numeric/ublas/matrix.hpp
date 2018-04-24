@@ -21,6 +21,8 @@
 #include <boost/serialization/collection_size_type.hpp>
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/nvp.hpp>
+#include <boost\numeric\ublas\opencl.hpp>
+
 
 // Iterators based on ideas of Jeremy Siek
 
