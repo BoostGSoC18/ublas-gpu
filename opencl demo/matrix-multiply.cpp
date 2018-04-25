@@ -27,7 +27,7 @@ int main(void)
 	opencl::startOpencl(2); //2 is a device number of the user's choice
 
 	start = clock();
-	opencl::prod(a, b, resU);
+	resU = opencl::prod(a, b);
 	end = clock();
 
 	opencl::endOpencl();
