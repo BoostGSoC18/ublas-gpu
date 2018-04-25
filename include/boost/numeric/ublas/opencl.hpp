@@ -5,7 +5,7 @@
 #include <boost\compute\algorithm.hpp>
 #include <boost\numeric\ublas\matrix.hpp>
 
-/* Include the clBLAS header. It includes the appropriate OpenCL headers */
+/// Include the clBLAS header. It includes the appropriate OpenCL headers
 #include <clBLAS.h>
 
 namespace opencl
@@ -13,7 +13,7 @@ namespace opencl
 	namespace compute = boost::compute;
 	namespace ublas = boost::numeric::ublas;
 
-	// for setting up the boost.compute library 
+	/// for setting up the boost.compute library 
 	compute::device device;
 	compute::context context;
 	compute::command_queue queue;
@@ -25,36 +25,41 @@ namespace opencl
 		context = compute::context(device);
 		queue = compute::command_queue(context, device);
 
-		//start clBlas
+		///start clBlas
 		clblasSetup();
 		
 	}
 
 	void endOpencl()
 	{
-		/* Finalize clBLAS */
-
+		/// Finalize clBLAS
 		clblasTeardown();
 
 	}
 
+
+	/**
+	This function computes the prodect of 2 matrices (A*B) and stores it at matrix result
+	it first transfers the data of matrix a,b to the device and execute a clBlas kernel according to 
+	the data type of the matrices to multiply them
+	*/
 	template <class T>
 	void prod(ublas::matrix<T>& a, ublas::matrix<T>& b, ublas::matrix<T>& result)
 	{
 
 		cl_int err;
 
-		//on the GPU to move the data of matrix (a) to
+		///on the GPU to move the data of matrix (a) to
 		compute::vector<T> aHolder(a.size1() * a.size2(), context);
 
-		//on the GPU to move the data of matrix (b) to
+		///on the GPU to move the data of matrix (b) to
 		compute::vector<T> bHolder(b.size1() * b.size2(), context);
 
-		//on the GPU to hold the result 
+		///on the GPU to hold the result 
 		compute::vector<T> resultHolder(a.size1() * b.size2(), context);
 
 		
-		//copy the data from a to aHolder
+		///copy the data from a to aHolder
 		compute::copy(
 			a.data().begin(),
 			a.data().end(),
@@ -62,7 +67,7 @@ namespace opencl
 			queue
 		);
 
-		//copy data from b to bHolder
+		///copy data from b to bHolder
 		compute::copy(
 			b.data().begin(),
 			b.data().end(),
@@ -74,7 +79,7 @@ namespace opencl
 		cl_event event = NULL;
 
 		if (std::is_same<T, float>::value)
-		/* Call clBLAS extended function. Perform gemm for float */
+		/// Call clBLAS extended function. Perform gemm for float 
 		err = clblasSgemm(clblasRowMajor, clblasNoTrans, clblasNoTrans,
 			a.size1(), b.size2(), a.size2(),
 			1, (cl_mem)aHolder.begin().get_buffer().get(), 0, a.size2(),
@@ -84,7 +89,7 @@ namespace opencl
 
 
 		else if (std::is_same<T, double>::value)
-			/* Call clBLAS extended function. Perform gemm for double */
+			/// Call clBLAS extended function. Perform gemm for double 
 			err = clblasDgemm(clblasRowMajor, clblasNoTrans, clblasNoTrans,
 				a.size1(), b.size2(), a.size2(),
 				1, (cl_mem)aHolder.begin().get_buffer().get(), 0, a.size2(),
@@ -96,7 +101,7 @@ namespace opencl
 
 
 
-		/* Wait for calculations to be finished. */
+		/// Wait for calculations to be finished. 
 		err = clWaitForEvents(1, &event);
 		queue.finish();
 
@@ -113,7 +118,10 @@ namespace opencl
 	}
 
 	
-
+	/**
+		This function computes the prodect of 2 matrices (A*B) and returns the result
+		it uses the function prod(A,B,result) and returns result
+	*/
 	template <class T>
 	ublas::matrix<T> prod(ublas::matrix<T>& a, ublas::matrix<T>& b)
 	{
