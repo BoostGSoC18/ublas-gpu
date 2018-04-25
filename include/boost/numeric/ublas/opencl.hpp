@@ -105,6 +105,7 @@ namespace opencl
 		err = clWaitForEvents(1, &event);
 		queue.finish();
 
+		result.resize(a.size1(), b.size2());
 
 		compute::copy(
 			resultHolder.begin(),
@@ -125,7 +126,7 @@ namespace opencl
 	template <class T>
 	ublas::matrix<T> prod(ublas::matrix<T>& a, ublas::matrix<T>& b)
 	{
-		ublas::matrix<T> result(a.size1(), b.size2());
+		ublas::matrix<T> result;
 		prod(a, b, result);
 		return result;
 	}
