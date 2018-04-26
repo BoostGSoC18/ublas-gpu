@@ -8,16 +8,53 @@
 /// Include the clBLAS header. It includes the appropriate OpenCL headers
 #include <clBLAS.h>
 
-#define GET_COMPUTE_INFORMATION	compute::device device = compute::system::devices().at(DEVICE_NUMBER);\
-								compute::context context = compute::context(device);\
-								compute::command_queue queue = compute::command_queue(context, device);
 
 namespace opencl
 {
 	namespace compute = boost::compute;
 	namespace ublas = boost::numeric::ublas;
 
+	class opencl_device
+	{
+	private:
+		compute::device device;
+		compute::context context;
+		compute::command_queue queue;
 
+	public:
+		opencl_device() {}
+
+		opencl_device(unsigned int device_number)
+		{
+			this->device = compute::system::devices().at(DEVICE_NUMBER);
+			this->context = compute::context(device);
+			this->queue = compute::command_queue(context, device);
+		}
+
+
+		void initialize(unsigned int device_number)
+		{
+			this->device = compute::system::devices().at(DEVICE_NUMBER); 
+			this->context = compute::context(device);
+			this->queue = compute::command_queue(context, device);
+		}
+
+		compute::device getDevice()
+		{
+			return device;
+		}
+
+		compute::context getContext()
+		{
+			return context;
+		}
+
+		compute::command_queue getQueue()
+		{
+			return queue;
+		}
+
+	};
 
 	inline void startOpencl()
 	{
@@ -42,13 +79,15 @@ namespace opencl
 	*/
 	template <class T>
 	BOOST_UBLAS_INLINE
-		void prod(ublas::matrix<T>& a, ublas::matrix<T>& b, ublas::matrix<T>& result)
+		void prod(ublas::matrix<T>& a, ublas::matrix<T>& b, ublas::matrix<T>& result , opencl_device cl_device)
 	{
+			///get data from device
+		compute::device device = cl_device.getDevice();
+		compute::context context = cl_device.getContext();
+		compute::command_queue queue = cl_device.getQueue();
 
-		GET_COMPUTE_INFORMATION
-
-			///on the GPU to move the data of matrix (a) to
-			compute::vector<T> aHolder(a.size1() * a.size2(), context);
+		///on the GPU to move the data of matrix (a) to
+		compute::vector<T> aHolder(a.size1() * a.size2(), context);
 
 		///on the GPU to move the data of matrix (b) to
 		compute::vector<T> bHolder(b.size1() * b.size2(), context);
@@ -123,32 +162,32 @@ namespace opencl
 
 	template <class T>
 	BOOST_UBLAS_INLINE
-		ublas::matrix<T> prod(ublas::matrix<T>& a, ublas::matrix<T>& b)
+		ublas::matrix<T> prod(ublas::matrix<T>& a, ublas::matrix<T>& b, opencl_device cl_device)
 	{
 		ublas::matrix<T> result;
-		prod(a, b, result);
+		prod(a, b, result, cl_device);
 		return result;
 	}
 
 
 	template <class T>
 	BOOST_UBLAS_INLINE
-		void prod(ublas::matrix_expression<T>& expressionA, ublas::matrix_expression<T>& expressionB, ublas::matrix<T>& result)
+		void prod(ublas::matrix_expression<T>& expressionA, ublas::matrix_expression<T>& expressionB, ublas::matrix<T>& result, opencl_device cl_device)
 	{
 		ublas::matrix<T> a = expressionA;
 		ublas::matrix<T> b = expressionB;
 
-		prod(a, b, result);
+		prod(a, b, result, cl_device);
 	}
 
 
 
 	template <class T>
 	BOOST_UBLAS_INLINE
-		ublas::matrix<T> prod(ublas::matrix_expression<T>& expressionA, ublas::matrix_expression<T>& expressionB)
+		ublas::matrix<T> prod(ublas::matrix_expression<T>& expressionA, ublas::matrix_expression<T>& expressionB, opencl_device cl_device)
 	{
 		ublas::matrix<T> result;
-		prod(expressionA, expressionB, result);
+		prod(expressionA, expressionB, result, cl_device);
 
 		return result;
 	}

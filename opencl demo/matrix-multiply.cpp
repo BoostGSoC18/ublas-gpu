@@ -1,7 +1,6 @@
 #include <sys/types.h>
 #include <stdio.h>
 #define ENABLE_OPENCL
-#define DEVICE_NUMBER 2
 #include <boost\numeric\ublas\matrix.hpp>
 #include <time.h>
 
@@ -15,6 +14,7 @@ namespace ublas = boost::numeric::ublas;
 int main(void)
 {
 
+	opencl::opencl_device device(2);
 
 	int size = 500;
 	ublas::matrix<float> a(size, size, 63);
@@ -29,7 +29,7 @@ int main(void)
 	opencl::startOpencl(); //2 is a device number of the user's choice
 
 	start = clock();
-	resU = opencl::prod(a, b);
+	resU = opencl::prod(a, b, device);
 	end = clock();
 
 	opencl::endOpencl();
