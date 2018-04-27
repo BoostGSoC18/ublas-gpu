@@ -12,8 +12,11 @@ namespace ublas = boost::numeric::ublas;
 #define DATA_TYPE float
 
 
-template <class T>
-bool compare(ublas::matrix<T>& a , ublas::matrix<T>& b)
+template <class T, int number_of_tests, int max_dimension>
+class bench_prod
+{
+
+ bool compare(ublas::matrix<T>& a , ublas::matrix<T>& b)
 {
 	if( (a.size1() != b.size1()) || (a.size2() != b.size2()) )
 		return false;
@@ -27,8 +30,7 @@ bool compare(ublas::matrix<T>& a , ublas::matrix<T>& b)
 
 }
 
-template <class T>
-void init_matrix(ublas::matrix<T>& m, int max_value)
+	void init_matrix(ublas::matrix<T>& m, int max_value)
 {
 	for (int i = 0; i < m.size1(); i++)
 	{
@@ -38,7 +40,10 @@ void init_matrix(ublas::matrix<T>& m, int max_value)
 	}
 }
 
-int main()
+public:
+
+
+ void run()
 {
 
 	int passedOperations =0;
@@ -47,17 +52,17 @@ int main()
 
 	opencl::startOpencl();
 
-	ublas::matrix<DATA_TYPE> a;
-	ublas::matrix<DATA_TYPE> b;
-	ublas::matrix<DATA_TYPE> resultUBLAS;
-	ublas::matrix<DATA_TYPE> resultOPENCL;
+	ublas::matrix<T> a;
+	ublas::matrix<T> b;
+	ublas::matrix<T> resultUBLAS;
+	ublas::matrix<T> resultOPENCL;
 
 
-	for(int i=0; i<NUMBER_OF_TESTS; i++)
+	for(int i=0; i<number_of_tests; i++)
 	{
-		int rowsA = std::rand()%MAX_DIMENSION+1;
-		int colsA = std::rand()%MAX_DIMENSION +1;
-		int colsB = std::rand()%MAX_DIMENSION +1;
+		int rowsA = std::rand()% max_dimension +1;
+		int colsA = std::rand()% max_dimension +1;
+		int colsB = std::rand()% max_dimension +1;
 		
 		 a.resize(rowsA,colsA);
 		 b.resize(colsA, colsB);
@@ -76,16 +81,17 @@ int main()
 			std::cout<< "Error in calculations"<<std::endl;
 
 			std::cout<<"passed: "<< passedOperations <<std::endl;
-			return 0;
+			return;
 		}
 
 		 passedOperations++;
 
 	}
-		std::cout<<"All is well"<<std::endl;
+		std::cout<<"All is well (matrix opencl prod) of "<< typeid(T).name() <<std::endl;
 		opencl::endOpencl();
 
 
 
-	return 0;
 }
+
+};

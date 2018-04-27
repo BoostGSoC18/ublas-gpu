@@ -72,23 +72,29 @@ namespace opencl
 
 	}
 
-
-
+	///copy data from ublas matrix to gpu vector
 	template <class T>
-	bool compare(ublas::matrix<T>& a, ublas::matrix<T>& b)
+	void copy_to_gpu(ublas::matrix<T>& m, compute::vector<T>& v, compute::command_queue& queue)
 	{
-		if ((a.size1() != b.size1()) || (a.size2() != b.size2()))
-			return false;
+		compute::copy(
+			m.data().begin(),
+			m.data().end(),
+			v.begin(),
+			queue
+		);
 
-		for (int i = 0; i<a.size1(); i++)
-			for (int j = 0; j<a.size2(); j++)
-				if (a(i, j) != b(i, j))
-				{
-					std::cout << "i = " << i << "   j = " << j << std::endl << a(i, j) << "  =>  " << b(i, j) << std::endl;
-					return false;
-				}
+	}
 
-		return true;
+	///copy data from gpu vector to ublas matrix
+	template <class T>
+	void copy_from_gpu(ublas::matrix<T>& m, compute::vector<T>& v, compute::command_queue& queue)
+	{
+		compute::copy(
+			v.begin(),
+			v.end(),
+			m.data().begin(),
+			queue
+		);
 
 	}
 
@@ -121,20 +127,10 @@ namespace opencl
 
 
 		///copy the data from a to aHolder
-		compute::copy(
-			a.data().begin(),
-			a.data().end(),
-			aHolder.begin(),
-			queue
-		);
+		copy_to_gpu(a, aHolder, queue);
 
 		///copy data from b to bHolder
-		compute::copy(
-			b.data().begin(),
-			b.data().end(),
-			bHolder.begin(),
-			queue
-		);
+		copy_to_gpu(b, bHolder, queue);
 
 
 
@@ -163,20 +159,13 @@ namespace opencl
 				1, &(queue.get()), 0, NULL, &event);
 
 
-		//std::cout << "err = " << err << std::endl;
-
 
 		///Wait for calculations to be finished.
 		clWaitForEvents(1, &event);
 
 
 
-		compute::copy(
-			resultHolder.begin(),
-			resultHolder.end(),
-			result.data().begin(),
-			queue
-		);
+		copy_from_gpu(result, resultHolder, queue);
 
 
 	}
