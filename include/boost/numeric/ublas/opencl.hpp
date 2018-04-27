@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <boost\compute\algorithm.hpp>
 #include <boost\numeric\ublas\matrix.hpp>
+#include <iostream>
 
 /// Include the clBLAS header. It includes the appropriate OpenCL headers
 #include <clBLAS.h>
@@ -26,7 +27,7 @@ namespace opencl
 
 		opencl_device(unsigned int device_number)
 		{
-			this->device = compute::system::devices().at(DEVICE_NUMBER);
+			this->device = compute::system::devices().at(device_number);
 			this->context = compute::context(device);
 			this->queue = compute::command_queue(context, device);
 		}
@@ -34,7 +35,7 @@ namespace opencl
 
 		void initialize(unsigned int device_number)
 		{
-			this->device = compute::system::devices().at(DEVICE_NUMBER); 
+			this->device = compute::system::devices().at(device_number);
 			this->context = compute::context(device);
 			this->queue = compute::command_queue(context, device);
 		}
@@ -72,6 +73,25 @@ namespace opencl
 	}
 
 
+
+	template <class T>
+	bool compare(ublas::matrix<T>& a, ublas::matrix<T>& b)
+	{
+		if ((a.size1() != b.size1()) || (a.size2() != b.size2()))
+			return false;
+
+		for (int i = 0; i<a.size1(); i++)
+			for (int j = 0; j<a.size2(); j++)
+				if (a(i, j) != b(i, j))
+				{
+					std::cout << "i = " << i << "   j = " << j << std::endl << a(i, j) << "  =>  " << b(i, j) << std::endl;
+					return false;
+				}
+
+		return true;
+
+	}
+
 	/**
 	This function computes the prodect of 2 matrices (A*B) and stores it at matrix result
 	it first transfers the data of matrix a,b to the device and execute a clBlas kernel according to
@@ -79,12 +99,16 @@ namespace opencl
 	*/
 	template <class T>
 	BOOST_UBLAS_INLINE
-		void prod(ublas::matrix<T>& a, ublas::matrix<T>& b, ublas::matrix<T>& result , opencl_device cl_device)
+		void prod(ublas::matrix<T>& a, ublas::matrix<T>& b, ublas::matrix<T>& result, opencl_device& cl_device)
 	{
-			///get data from device
+
+
+		///get data from device
 		compute::device device = cl_device.getDevice();
 		compute::context context = cl_device.getContext();
 		compute::command_queue queue = cl_device.getQueue();
+
+
 
 		///on the GPU to move the data of matrix (a) to
 		compute::vector<T> aHolder(a.size1() * a.size2(), context);
@@ -93,7 +117,7 @@ namespace opencl
 		compute::vector<T> bHolder(b.size1() * b.size2(), context);
 
 		///on the GPU to hold the result 
-		compute::vector<T> resultHolder(a.size1() * b.size2(), context);
+		compute::vector<T> resultHolder(a.size1() * b.size2(), 0, queue);
 
 
 		///copy the data from a to aHolder
@@ -113,11 +137,15 @@ namespace opencl
 		);
 
 
+
+		result.resize(a.size1(), b.size2());
+
+		cl_int err;
 		cl_event event = NULL;
 
 		if (std::is_same<T, float>::value)
 			///Call clBLAS extended function. Perform gemm for float
-			clblasSgemm(clblasRowMajor, clblasNoTrans, clblasNoTrans,
+			err = clblasSgemm(clblasRowMajor, clblasNoTrans, clblasNoTrans,
 				a.size1(), b.size2(), a.size2(),
 				1, (cl_mem)aHolder.begin().get_buffer().get(), 0, a.size2(),
 				(cl_mem)bHolder.begin().get_buffer().get(), 0, b.size2(), 1,
@@ -127,7 +155,7 @@ namespace opencl
 
 		else if (std::is_same<T, double>::value)
 			///Call clBLAS extended function. Perform gemm for double
-			clblasDgemm(clblasRowMajor, clblasNoTrans, clblasNoTrans,
+			err = clblasDgemm(clblasRowMajor, clblasNoTrans, clblasNoTrans,
 				a.size1(), b.size2(), a.size2(),
 				1, (cl_mem)aHolder.begin().get_buffer().get(), 0, a.size2(),
 				(cl_mem)bHolder.begin().get_buffer().get(), 0, b.size2(), 1,
@@ -135,13 +163,13 @@ namespace opencl
 				1, &(queue.get()), 0, NULL, &event);
 
 
-
+		//std::cout << "err = " << err << std::endl;
 
 
 		///Wait for calculations to be finished.
 		clWaitForEvents(1, &event);
 
-		result.resize(a.size1(), b.size2());
+
 
 		compute::copy(
 			resultHolder.begin(),
@@ -149,7 +177,6 @@ namespace opencl
 			result.data().begin(),
 			queue
 		);
-
 
 
 	}
@@ -170,27 +197,6 @@ namespace opencl
 	}
 
 
-	template <class T>
-	BOOST_UBLAS_INLINE
-		void prod(ublas::matrix_expression<T>& expressionA, ublas::matrix_expression<T>& expressionB, ublas::matrix<T>& result, opencl_device cl_device)
-	{
-		ublas::matrix<T> a = expressionA;
-		ublas::matrix<T> b = expressionB;
-
-		prod(a, b, result, cl_device);
-	}
-
-
-
-	template <class T>
-	BOOST_UBLAS_INLINE
-		ublas::matrix<T> prod(ublas::matrix_expression<T>& expressionA, ublas::matrix_expression<T>& expressionB, opencl_device cl_device)
-	{
-		ublas::matrix<T> result;
-		prod(expressionA, expressionB, result, cl_device);
-
-		return result;
-	}
 
 }
 
