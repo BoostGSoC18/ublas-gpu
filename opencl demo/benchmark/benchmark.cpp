@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #define ENABLE_OPENCL
-#include <boost\numeric\ublas\matrix.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 #include <time.h>
 #include <math.h>
 #include <boost/timer.hpp>
@@ -62,13 +62,13 @@ void bench_difference(int dimension,int times, opencl::opencl_device& device)
 	header("opnecl prod : ", dimension);
 	boost::timer t1;
 	run_prod_opencl(times, device);
-	std::cout << "time taken = " << t1.elapsed() << std::endl;
+	std::cout << "time taken = " << t1.elapsed() << " s"<<std::endl;
 
 
 	header("ublas prod : ", dimension);
 	boost::timer t0;
 	run_prod_ublas(times);
-	std::cout << "time taken = " << t0.elapsed() << std::endl;
+	std::cout << "time taken = " << t0.elapsed() << " s" << std::endl;
 
 
 	std::cout << std::endl;

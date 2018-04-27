@@ -2,8 +2,8 @@
 #define OPENCL_MATRIX
 
 #include <sys/types.h>
-#include <boost\compute\algorithm.hpp>
-#include <boost\numeric\ublas\matrix.hpp>
+#include <boost/compute/algorithm.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 #include <iostream>
 
 /// Include the clBLAS header. It includes the appropriate OpenCL headers

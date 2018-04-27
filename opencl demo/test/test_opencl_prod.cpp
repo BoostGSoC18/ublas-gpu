@@ -1,7 +1,7 @@
 #include <sys/types.h>
 #include <stdio.h>
 #define ENABLE_OPENCL
-#include <boost\numeric\ublas\matrix.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
 #include <time.h>
 #include <math.h>
 
