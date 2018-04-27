@@ -1,5 +1,5 @@
 CC=g++
-Deps= test_opencl_prod.cpp
+Deps= test_main.cpp
 OutputName=test
 boost_include_dir="C:/Program Files/boost/boost_1_66_0"
 opencl_include_dir="C:/Program Files (x86)/AMD APP SDK/3.0/include"
