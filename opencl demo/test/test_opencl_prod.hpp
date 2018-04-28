@@ -12,11 +12,11 @@ namespace ublas = boost::numeric::ublas;
 #define DATA_TYPE float
 
 
-template <class T, int number_of_tests, int max_dimension>
+template <class T, class F, int number_of_tests, int max_dimension>
 class bench_prod
 {
 
- bool compare(ublas::matrix<T>& a , ublas::matrix<T>& b)
+ bool compare(ublas::matrix<T,F>& a , ublas::matrix<T,F>& b)
 {
 	if( (a.size1() != b.size1()) || (a.size2() != b.size2()) )
 		return false;
@@ -30,7 +30,7 @@ class bench_prod
 
 }
 
-	void init_matrix(ublas::matrix<T>& m, int max_value)
+	void init_matrix(ublas::matrix<T,F>& m, int max_value)
 {
 	for (int i = 0; i < m.size1(); i++)
 	{
@@ -52,10 +52,10 @@ public:
 
 	opencl::startOpencl();
 
-	ublas::matrix<T> a;
-	ublas::matrix<T> b;
-	ublas::matrix<T> resultUBLAS;
-	ublas::matrix<T> resultOPENCL;
+	ublas::matrix<T,F> a;
+	ublas::matrix<T,F> b;
+	ublas::matrix<T,F> resultUBLAS;
+	ublas::matrix<T,F> resultOPENCL;
 
 
 	for(int i=0; i<number_of_tests; i++)

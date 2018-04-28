@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <boost/compute/algorithm.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/functional.hpp>
 #include <iostream>
 
 /// Include the clBLAS header. It includes the appropriate OpenCL headers
@@ -14,6 +15,8 @@ namespace opencl
 {
 	namespace compute = boost::compute;
 	namespace ublas = boost::numeric::ublas;
+
+
 
 	class opencl_device
 	{
@@ -73,8 +76,8 @@ namespace opencl
 	}
 
 	///copy data from ublas matrix to gpu vector
-	template <class T>
-	void copy_to_gpu(ublas::matrix<T>& m, compute::vector<T>& v, compute::command_queue& queue)
+	template <class T, class F, class A>
+	void copy_to_gpu(ublas::matrix<T, F, A>& m, compute::vector<T>& v, compute::command_queue& queue)
 	{
 		compute::copy(
 			m.data().begin(),
@@ -86,8 +89,8 @@ namespace opencl
 	}
 
 	///copy data from gpu vector to ublas matrix
-	template <class T>
-	void copy_from_gpu(ublas::matrix<T>& m, compute::vector<T>& v, compute::command_queue& queue)
+	template <class T, class F, class A>
+	void copy_from_gpu(ublas::matrix<T, F, A>& m, compute::vector<T>& v, compute::command_queue& queue)
 	{
 		compute::copy(
 			v.begin(),
@@ -103,9 +106,9 @@ namespace opencl
 	it first transfers the data of matrix a,b to the device and execute a clBlas kernel according to
 	the data type of the matrices to multiply them
 	*/
-	template <class T>
+	template <class T, class F, class A>
 	BOOST_UBLAS_INLINE
-		void prod(ublas::matrix<T>& a, ublas::matrix<T>& b, ublas::matrix<T>& result, opencl_device& cl_device)
+		void prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, ublas::matrix<T, F, A>& result, opencl_device& cl_device)
 	{
 
 
@@ -139,23 +142,29 @@ namespace opencl
 		cl_int err;
 		cl_event event = NULL;
 
+		clblasOrder Order = std::is_same<F, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
+		int lda = Order == clblasRowMajor ? a.size2() : a.size1();
+		int ldb = Order == clblasRowMajor ? b.size2() : a.size2();
+		int ldc = Order == clblasRowMajor ? b.size2() : a.size1();
+
+
 		if (std::is_same<T, float>::value)
 			///Call clBLAS extended function. Perform gemm for float
-			err = clblasSgemm(clblasRowMajor, clblasNoTrans, clblasNoTrans,
+			err = clblasSgemm(Order, clblasNoTrans, clblasNoTrans,
 				a.size1(), b.size2(), a.size2(),
-				1, (cl_mem)aHolder.begin().get_buffer().get(), 0, a.size2(),
-				(cl_mem)bHolder.begin().get_buffer().get(), 0, b.size2(), 1,
-				(cl_mem)resultHolder.begin().get_buffer().get(), 0, b.size2(),
+				1, (cl_mem)aHolder.begin().get_buffer().get(), 0, lda,
+				(cl_mem)bHolder.begin().get_buffer().get(), 0, ldb, 1,
+				(cl_mem)resultHolder.begin().get_buffer().get(), 0, ldc,
 				1, &(queue.get()), 0, NULL, &event);
 
 
 		else if (std::is_same<T, double>::value)
 			///Call clBLAS extended function. Perform gemm for double
-			err = clblasDgemm(clblasRowMajor, clblasNoTrans, clblasNoTrans,
+			err = clblasDgemm(Order, clblasNoTrans, clblasNoTrans,
 				a.size1(), b.size2(), a.size2(),
-				1, (cl_mem)aHolder.begin().get_buffer().get(), 0, a.size2(),
-				(cl_mem)bHolder.begin().get_buffer().get(), 0, b.size2(), 1,
-				(cl_mem)resultHolder.begin().get_buffer().get(), 0, b.size2(),
+				1, (cl_mem)aHolder.begin().get_buffer().get(), 0, lda,
+				(cl_mem)bHolder.begin().get_buffer().get(), 0, ldb, 1,
+				(cl_mem)resultHolder.begin().get_buffer().get(), 0, ldc,
 				1, &(queue.get()), 0, NULL, &event);
 
 
@@ -176,11 +185,11 @@ namespace opencl
 	it uses the function prod(A,B,result) and returns result
 	*/
 
-	template <class T>
+	template <class T, class F, class A>
 	BOOST_UBLAS_INLINE
-		ublas::matrix<T> prod(ublas::matrix<T>& a, ublas::matrix<T>& b, opencl_device cl_device)
+		ublas::matrix<T, F, A> prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, opencl_device cl_device)
 	{
-		ublas::matrix<T> result;
+		ublas::matrix<T, F, A> result;
 		prod(a, b, result, cl_device);
 		return result;
 	}
