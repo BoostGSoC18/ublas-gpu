@@ -101,6 +101,12 @@ namespace opencl
 
 	}
 
+
+
+#define ONE_DOUBLE_COMPLEX  { { 1.0, 00.0 } }
+#define ONE_FLOAT_COMPLEX  { { 1.0f, 00.0f } }
+
+
 	/**
 	This function computes the prodect of 2 matrices (A*B) and stores it at matrix result
 	it first transfers the data of matrix a,b to the device and execute a clBlas kernel according to
@@ -148,6 +154,7 @@ namespace opencl
 		int ldc = Order == clblasRowMajor ? b.size2() : a.size1();
 
 
+
 		if (std::is_same<T, float>::value)
 			///Call clBLAS extended function. Perform gemm for float
 			err = clblasSgemm(Order, clblasNoTrans, clblasNoTrans,
@@ -164,6 +171,24 @@ namespace opencl
 				a.size1(), b.size2(), a.size2(),
 				1, (cl_mem)aHolder.begin().get_buffer().get(), 0, lda,
 				(cl_mem)bHolder.begin().get_buffer().get(), 0, ldb, 1,
+				(cl_mem)resultHolder.begin().get_buffer().get(), 0, ldc,
+				1, &(queue.get()), 0, NULL, &event);
+
+		else if (std::is_same<T, std::complex<float>>::value)
+			///Call clBLAS extended function. Perform gemm for double
+			err = clblasCgemm(Order, clblasNoTrans, clblasNoTrans,
+				a.size1(), b.size2(), a.size2(),
+				ONE_FLOAT_COMPLEX, (cl_mem)aHolder.begin().get_buffer().get(), 0, lda,
+				(cl_mem)bHolder.begin().get_buffer().get(), 0, ldb, ONE_FLOAT_COMPLEX,
+				(cl_mem)resultHolder.begin().get_buffer().get(), 0, ldc,
+				1, &(queue.get()), 0, NULL, &event);
+
+		else if (std::is_same<T, std::complex<double>>::value)
+			///Call clBLAS extended function. Perform gemm for double
+			err = clblasZgemm(Order, clblasNoTrans, clblasNoTrans,
+				a.size1(), b.size2(), a.size2(),
+				ONE_DOUBLE_COMPLEX, (cl_mem)aHolder.begin().get_buffer().get(), 0, lda,
+				(cl_mem)bHolder.begin().get_buffer().get(), 0, ldb, ONE_DOUBLE_COMPLEX,
 				(cl_mem)resultHolder.begin().get_buffer().get(), 0, ldc,
 				1, &(queue.get()), 0, NULL, &event);
 
