@@ -1,0 +1,14 @@
+
+# bench6 - measure the performance difference between normal prid funvtion and opencl one
+
+exe bench6
+    : bench6.cpp
+    :
+    <include>C:/Program\ Files\ (x86)/AMD\ APP\ SDK/3.0/include
+    <include>C:/Program\ Files/clBLAS/src
+    <host-os>linux:<linkflags>"-lOpenCL"
+    <host-os>linux:<linkflags>"-lclBLAS"
+    <host-os>windows:<linkflags>"-lOpenCL"
+    <host-os>windows:<linkflags>"-lclBLAS"
+    <link>static
+    ;

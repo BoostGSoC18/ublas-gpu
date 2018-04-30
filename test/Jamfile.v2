@@ -26,23 +26,23 @@ UBLAS_TESTSET ?=
 #  Sparse matrices: USE_MAPPED_MATRIX USE_COMPRESSED_MATRIX USE_COORDINATE_MATRIX USE_MAPPED_VECTOR_OF_MAPPED_VECTOR USE_GENERALIZED_VECTOR_OF_VECTOR
 
 UBLAS_TESTSET_SPARSE = [ modules.peek : UBLAS_TESTSET_SPARSE ] ;
-UBLAS_TESTSET_SPARSE ?= 
+UBLAS_TESTSET_SPARSE ?=
             USE_DOUBLE USE_STD_COMPLEX
             # USE_RANGE USE_SLICE	 # Too complex for regression testing
             USE_UNBOUNDED_ARRAY
 			USE_MAP_ARRAY USE_STD_MAP
-            USE_MAPPED_VECTOR USE_COMPRESSED_VECTOR 
-            USE_MAPPED_MATRIX USE_COMPRESSED_MATRIX 
+            USE_MAPPED_VECTOR USE_COMPRESSED_VECTOR
+            USE_MAPPED_MATRIX USE_COMPRESSED_MATRIX
 			;
 # Generalize VofV still failing
 #            USE_GENERALIZED_VECTOR_OF_VECTOR
 
 UBLAS_TESTSET_SPARSE_COO = [ modules.peek : UBLAS_TESTSET_SPARSE_COO ] ;
-UBLAS_TESTSET_SPARSE_COO ?= 
+UBLAS_TESTSET_SPARSE_COO ?=
             USE_DOUBLE USE_STD_COMPLEX
             USE_UNBOUNDED_ARRAY
             USE_COORDINATE_VECTOR
-            USE_COORDINATE_MATRIX 
+            USE_COORDINATE_MATRIX
 			;
 
 
@@ -66,6 +66,8 @@ project
        #<toolset>msvc:<cxxflags>/wd4224 # nonstandard extension used : formal parameter 'arg' was previously defined as a type.
        #<toolset>msvc:<cxxflags>/wd4127 # expression is constant.
        #<toolset>msvc:<cxxflags>/wd4701 # unreachable code - needed for lexical cast - temporary for Boost 1.40 & earlier.
+       <include>C:/Program\ Files\ (x86)/AMD\ APP\ SDK/3.0/include
+       <include>C:/Program\ Files/clBLAS/src
     ;
 
 
@@ -108,11 +110,11 @@ test-suite numeric/uBLAS
             test33.cpp
         : : :
             <define>USE_FLOAT
-            <define>USE_DOUBLE 
-            <define>USE_STD_COMPLEX 
+            <define>USE_DOUBLE
+            <define>USE_STD_COMPLEX
             <define>USE_STD_MAP
-            <define>USE_MAPPED_VECTOR_OF_MAPPED_VECTOR 
-        : test3_mvov 
+            <define>USE_MAPPED_VECTOR_OF_MAPPED_VECTOR
+        : test3_mvov
         :
       ]
       [ run test4.cpp
@@ -210,23 +212,23 @@ test-suite numeric/uBLAS
         :
       ]
       [ run test_inplace_solve.cpp
-        : 
-        : 
+        :
+        :
         : <define>$(UBLAS_TESTSET)
         : test_inplace_solve_basic
         :
       ]
       [ run test_inplace_solve.cpp
-        : 
-        : 
+        :
+        :
         : <define>$(UBLAS_TESTSET_SPARSE)
           <define>$(UBLAS_TESTSET_SPARSE_COO)
         : test_inplace_solve_sparse
         :
       ]
       [ run test_inplace_solve.cpp
-        : 
-        : 
+        :
+        :
         : <define>USE_MAPPED_VECTOR_OF_MAPPED_VECTOR
         : test_inplace_solve_mvov
         :
@@ -248,5 +250,12 @@ test-suite numeric/uBLAS
         :
       ]
       [ run test_matrix_vector.cpp
+      ]
+      [ run test_opencl.cpp
+        : : :
+          <host-os>linux:<linkflags>"-lOpenCL"
+          <host-os>linux:<linkflags>"-lclBLAS"
+          <host-os>windows:<linkflags>"-lOpenCL"
+          <host-os>windows:<linkflags>"-lclBLAS"
       ]
     ;
