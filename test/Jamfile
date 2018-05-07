@@ -5,6 +5,11 @@
 
 # Bring in rules for testing
 import testing ;
+import ac ;
+
+using opencl ;
+using clblas ;
+
 
 # Define features to test:
 #  Value types: USE_FLOAT USE_DOUBLE USE_STD_COMPLEX
@@ -251,11 +256,11 @@ test-suite numeric/uBLAS
       ]
       [ run test_matrix_vector.cpp
       ]
+
       [ run test_opencl.cpp
-        : : :
-          <host-os>linux:<linkflags>"-lOpenCL"
-          <host-os>linux:<linkflags>"-lclBLAS"
-          <host-os>windows:<linkflags>"-lOpenCL"
-          <host-os>windows:<linkflags>"-lclBLAS"
+      : # args
+      : # input files
+      : # requirements
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
       ]
     ;
