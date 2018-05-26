@@ -47,7 +47,7 @@ public:
 {
 
 	int passedOperations =0;
-	opencl::opencl_device device(2);
+	opencl::opencl_device device(0);
     std::srand(time(0));
 
 	opencl::startOpencl();
