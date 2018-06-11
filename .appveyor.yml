@@ -12,6 +12,7 @@ branches:
     - develop
     - opencl
     - /feature\/.*/
+    - working
 
 environment:
   matrix:

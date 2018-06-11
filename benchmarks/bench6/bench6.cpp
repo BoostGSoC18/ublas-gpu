@@ -81,7 +81,7 @@ int main()
 	std::srand(time(0));
 
 	opencl::startOpencl();
-	opencl::opencl_device device(2);
+	opencl::opencl_device device(0);
 	
 	bench_difference(100, 1, device);
 	bench_difference(200, 1, device);
