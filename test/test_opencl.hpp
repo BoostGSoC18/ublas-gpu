@@ -6,6 +6,7 @@
 #include <math.h>
 
 namespace ublas = boost::numeric::ublas;
+namespace opencl = boost::numeric::ublas::opencl;
 
 #define NUMBER_OF_TESTS 100
 #define MAX_DIMENSION 100

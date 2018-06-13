@@ -8,6 +8,7 @@
 #define DATA_TYPE float
 
 namespace ublas = boost::numeric::ublas;
+namespace opencl = boost::numeric::ublas::opencl;
 
 ublas::matrix<DATA_TYPE> a;
 ublas::matrix<DATA_TYPE> b;
