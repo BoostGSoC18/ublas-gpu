@@ -23,7 +23,8 @@
 #include <boost/serialization/nvp.hpp>
 
 #ifdef ENABLE_OPENCL
-#include <boost/numeric/ublas/opencl.hpp>
+#include <boost/numeric/ublas/opencl/opencl_core.hpp>
+#include <boost/numeric/ublas/opencl/operations.hpp>
 #endif
 
 
