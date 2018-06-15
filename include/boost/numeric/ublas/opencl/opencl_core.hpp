@@ -98,31 +98,7 @@ namespace boost {
 
 				}
 
-				///copy data from ublas matrix to gpu vector
-				template <class T, class F, class A>
-				void copy_to_device(ublas::matrix<T, F, A>& m, ublas::matrix<T, F, opencl::storage>& mGPU, opencl::opencl_device device)
-				{
-					compute::copy(
-						m.data().begin(),
-						m.data().end(),
-						mGPU.data().begin(),
-						device.getQueue()
-					);
-
-				}
-
-				///copy data from gpu vector to ublas matrix
-				template <class T, class F, class A>
-				void copy_from_device(ublas::matrix<T, F, A>& m, ublas::matrix<T, F, opencl::storage>& mGPU)
-				{
-					compute::copy(
-						mGPU.data().begin(),
-						mGPU.data().end(),
-						m.data().begin(),
-						mGPU.device().getQueue()
-					);
-
-				}
+		
 
 
 
@@ -199,6 +175,33 @@ namespace boost {
 				void fill(T value)
 				{
 					compute::fill(data_.begin(), data_.end(), value, device_.getQueue());
+				}
+
+
+				template<class A>
+				void to_host(ublas::matrix<T, L, A>& m)
+				{
+					this->resize(m.size1(), m.size2());
+					compute::copy(
+						m.data().begin(),
+						m.data().end(),
+						this->data().begin(),
+						device_.getQueue()
+					);
+				}
+
+
+
+				template<class A>
+				 void from_host(ublas::matrix<T, L, A>& m)
+				{
+					 m.resize(size1_, size2_);
+					compute::copy(
+						this->data().begin(),
+						this->data().end(),
+						m.data().begin(),
+						device_.getQueue()
+					);
 				}
 
 

@@ -118,12 +118,12 @@ namespace boost {
 				{
 
 					///copy the data from a to aHolder
-					ublas::matrix<T, F, opencl::storage> aHolder(a.size1(), a.size2(), device);
-					copy_to_device(a, aHolder, device);
+					ublas::matrix<T, F, opencl::storage> aHolder( device);
+					aHolder.to_host(a);
 
 					///copy the data from b to bHolder
-					ublas::matrix<T, F, opencl::storage> bHolder(b.size1(), b.size2(), device);
-					copy_to_device(b, bHolder, device);
+					ublas::matrix<T, F, opencl::storage> bHolder(device);
+					bHolder.to_host(b);
 
 
 
@@ -148,10 +148,7 @@ namespace boost {
 
 					prod(a, b, resultHolder, device ); //call the prod function that multiplies a and b and leave reult o device
 
-
-					result.resize(a.size1(), b.size2());
-
-					copy_from_device(result, resultHolder);
+					resultHolder.from_host(result);
 
 
 				}
