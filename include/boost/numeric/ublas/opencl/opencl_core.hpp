@@ -100,7 +100,7 @@ namespace boost {
 
 				///copy data from ublas matrix to gpu vector
 				template <class T, class F, class A>
-				void copy_to_gpu(ublas::matrix<T, F, A>& m, ublas::matrix<T, F, opencl::storage>& mGPU, opencl::opencl_device device)
+				void copy_to_device(ublas::matrix<T, F, A>& m, ublas::matrix<T, F, opencl::storage>& mGPU, opencl::opencl_device device)
 				{
 					compute::copy(
 						m.data().begin(),
@@ -113,7 +113,7 @@ namespace boost {
 
 				///copy data from gpu vector to ublas matrix
 				template <class T, class F, class A>
-				void copy_from_gpu(ublas::matrix<T, F, A>& m, ublas::matrix<T, F, opencl::storage>& mGPU)
+				void copy_from_device(ublas::matrix<T, F, A>& m, ublas::matrix<T, F, opencl::storage>& mGPU)
 				{
 					compute::copy(
 						mGPU.data().begin(),
@@ -152,6 +152,12 @@ namespace boost {
 					compute::fill(data_.begin(), data_.end(), value, d.getQueue());
 				}
 
+
+				matrix(opencl::opencl_device& d)
+					: matrix_container<self_type>(),
+					size1_(0), size2_(0), data_(compute::vector<T>(d.getContext())), device_(d)
+				{}
+
 				// Accessors
 				/** Return the number of rows of the matrix
 				*/
@@ -176,6 +182,25 @@ namespace boost {
 				*/
 				const opencl::opencl_device &device() const { return device_; }
 				opencl::opencl_device &device() { return device_; }
+
+
+				/** Resize the matrix
+				*/
+				void resize(size_type size1, size_type size2)
+				{
+					size1_ = size1;
+					size2_ = size2;
+					data_.resize(layout_type::storage_size(size1, size2));
+				}
+
+				/**
+				Fill all elements of the matrix with the value
+				*/
+				void fill(T value)
+				{
+					compute::fill(data_.begin(), data_.end(), value, device_.getQueue());
+				}
+
 
 			private:
 				size_type size1_;

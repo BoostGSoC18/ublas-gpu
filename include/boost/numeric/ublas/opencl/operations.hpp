@@ -30,7 +30,7 @@ namespace boost {
 
 
 				/**
-				This function computes the prodect of 2 matrices (A*B) and stores it at matrix result
+				This function computes the prodect of 2 matrices (A*B) and stores it at matrix result all 3 matrices are on device
 				a and b are originally on gpu (on the same device) and the result is left on the same device
 				*/
 				template <class T, class F>
@@ -45,7 +45,8 @@ namespace boost {
 					compute::command_queue queue = a.device().getQueue();
 
 
-
+					result.resize(a.size1(), b.size2());
+					result.fill(0);
 
 					cl_int err;
 					cl_event event = NULL;
@@ -106,11 +107,34 @@ namespace boost {
 
 
 
+				/**
+				This function computes the prodect of 2 matrices (A*B) and stores it at matrix result and keeps result on device
+				it first transfers the data of matrix a,b to the device and execute a clBlas kernel according to
+				the data type of the matrices to multiply them
+				*/
+				template <class T, class F, class A>
+				BOOST_UBLAS_INLINE
+					void prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, ublas::matrix<T, F, opencl::storage>& result, opencl_device& device)
+				{
 
+					///copy the data from a to aHolder
+					ublas::matrix<T, F, opencl::storage> aHolder(a.size1(), a.size2(), device);
+					copy_to_device(a, aHolder, device);
+
+					///copy the data from b to bHolder
+					ublas::matrix<T, F, opencl::storage> bHolder(b.size1(), b.size2(), device);
+					copy_to_device(b, bHolder, device);
+
+
+
+					prod(aHolder, bHolder, result); //call the prod function that multiplies a function already on gpu
+
+
+				}
 
 
 				/**
-				This function computes the prodect of 2 matrices (A*B) and stores it at matrix result
+				This function computes the prodect of 2 matrices (A*B) and stores it at matrix result (all 3 matrices are not on device
 				it first transfers the data of matrix a,b to the device and execute a clBlas kernel according to
 				the data type of the matrices to multiply them
 				*/
@@ -119,30 +143,22 @@ namespace boost {
 					void prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, ublas::matrix<T, F, A>& result, opencl_device& device)
 				{
 
-					///copy the data from a to aHolder
-					ublas::matrix<T, F, opencl::storage> aHolder(a.size1(), a.size2(), device);
-					copy_to_gpu(a, aHolder, device);
 
-					///copy the data from b to bHolder
-					ublas::matrix<T, F, opencl::storage> bHolder(b.size1(), b.size2(), device);
-					copy_to_gpu(b, bHolder, device);
+					ublas::matrix<T, F, opencl::storage> resultHolder(device);
 
-
-					ublas::matrix<T, F, opencl::storage> resultHolder(a.size1(), b.size2(), device, 0);
-
-					prod(aHolder, bHolder, resultHolder); //call the prod function that multiplies a function already on gpu
+					prod(a, b, resultHolder, device ); //call the prod function that multiplies a and b and leave reult o device
 
 
 					result.resize(a.size1(), b.size2());
 
-					copy_from_gpu(result, resultHolder);
+					copy_from_device(result, resultHolder);
 
 
 				}
 
 
 				/**
-				This function computes the prodect of 2 matrices (A*B) and returns the result
+				This function computes the prodect of 2 matrices (A*B) that are not on gpu and returns the result
 				it uses the function prod(A,B,result) and returns result
 				*/
 
