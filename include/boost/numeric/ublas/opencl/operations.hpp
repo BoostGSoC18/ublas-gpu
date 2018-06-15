@@ -37,7 +37,8 @@ namespace ublas = boost::numeric::ublas;
 template <class T, class F>
   void prod(ublas::matrix<T, F, opencl::storage>& a, ublas::matrix<T, F, opencl::storage>& b, ublas::matrix<T, F, opencl::storage>& result)
 {
-
+  //check all matrices are on same context
+  assert((a.queue().get_context() == b.queue().get_context()) && (a.queue().get_context() == result.queue().get_context()));
 
   //get data from device
   compute::device device = a.queue().get_device();
