@@ -117,18 +117,7 @@ namespace boost {
 					void prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, ublas::matrix<T, F, opencl::storage>& result, opencl_device& device)
 				{
 
-					///copy the data from a to aHolder
-					ublas::matrix<T, F, opencl::storage> aHolder( device);
-					aHolder.to_host(a);
-
-					///copy the data from b to bHolder
-					ublas::matrix<T, F, opencl::storage> bHolder(device);
-					bHolder.to_host(b);
-
-
-
-					prod(aHolder, bHolder, result); //call the prod function that multiplies a function already on gpu
-
+					
 
 				}
 
@@ -143,10 +132,17 @@ namespace boost {
 					void prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, ublas::matrix<T, F, A>& result, opencl_device& device)
 				{
 
+					///copy the data from a to aHolder
+					ublas::matrix<T, F, opencl::storage> aHolder(device);
+					aHolder.to_host(a);
+
+					///copy the data from b to bHolder
+					ublas::matrix<T, F, opencl::storage> bHolder(device);
+					bHolder.to_host(b);
 
 					ublas::matrix<T, F, opencl::storage> resultHolder(device);
 
-					prod(a, b, resultHolder, device ); //call the prod function that multiplies a and b and leave reult o device
+					prod(aHolder, bHolder, resultHolder); //call the prod function that multiplies a function already on gpu
 
 					resultHolder.from_host(result);
 
