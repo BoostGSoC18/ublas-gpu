@@ -1,5 +1,4 @@
 #ifndef OPENCL_MATRIX
-#ifndef OPENCL_MATRIX
 #define OPENCL_MATRIX
 
 #include <boost/compute/core.hpp>
