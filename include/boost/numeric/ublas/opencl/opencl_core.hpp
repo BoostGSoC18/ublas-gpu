@@ -1,4 +1,5 @@
 #ifndef OPENCL_MATRIX
+#ifndef OPENCL_MATRIX
 #define OPENCL_MATRIX
 
 #include <boost/compute/core.hpp>
@@ -174,8 +175,8 @@ namespace boost {
 
 		/** Dense matrix constructor with size (size1,size2) and resides on memory of device d
 		* \param d is the boost::nemeric::ublas::opencl::opencl_device that contains the matrix on its memory
-		 * \param size1 number of rows
-		 * \param size2 number of columns
+		* \param size1 number of rows
+		* \param size2 number of columns
 		*/
 		BOOST_UBLAS_INLINE
 		  matrix(size_type size1, size_type size2, opencl::opencl_device &d)
