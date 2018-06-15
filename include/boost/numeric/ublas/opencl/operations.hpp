@@ -41,12 +41,10 @@ namespace boost {
 
 
 		  //get data from device
-		  compute::device device = a.device().getDevice();
-		  compute::context context = a.device().getContext();
-		  compute::command_queue queue = a.device().getQueue();
+		  compute::device device = a.queue().get_device();
+		  compute::context context = a.queue().get_context();
+		  compute::command_queue queue = a.queue();
 
-
-		  result.resize(a.size1(), b.size2());
 		  result.fill(0);
 
 		  cl_event event = NULL;
@@ -62,9 +60,9 @@ namespace boost {
 			//Call clBLAS extended function. Perform gemm for float
 			clblasSgemm(Order, clblasNoTrans, clblasNoTrans,
 			  a.size1(), b.size2(), a.size2(),
-			  1, (cl_mem)a.data().begin().get_buffer().get(), 0, lda,
-			  (cl_mem)b.data().begin().get_buffer().get(), 0, ldb, 1,
-			  (cl_mem)result.data().begin().get_buffer().get(), 0, ldc,
+			  1, (cl_mem)a.begin().get_buffer().get(), 0, lda,
+			  (cl_mem)b.begin().get_buffer().get(), 0, ldb, 1,
+			  (cl_mem)result.begin().get_buffer().get(), 0, ldc,
 			  1, &(queue.get()), 0, NULL, &event);
 
 
@@ -72,27 +70,27 @@ namespace boost {
 			//Call clBLAS extended function. Perform gemm for double
 			clblasDgemm(Order, clblasNoTrans, clblasNoTrans,
 			  a.size1(), b.size2(), a.size2(),
-			  1, (cl_mem)a.data().begin().get_buffer().get(), 0, lda,
-			  (cl_mem)b.data().begin().get_buffer().get(), 0, ldb, 1,
-			  (cl_mem)result.data().begin().get_buffer().get(), 0, ldc,
+			  1, (cl_mem)a.begin().get_buffer().get(), 0, lda,
+			  (cl_mem)b.begin().get_buffer().get(), 0, ldb, 1,
+			  (cl_mem)result.begin().get_buffer().get(), 0, ldc,
 			  1, &(queue.get()), 0, NULL, &event);
 
 		  else if (std::is_same<T, std::complex<float>>::value)
 			//Call clBLAS extended function. Perform gemm for double
 			clblasCgemm(Order, clblasNoTrans, clblasNoTrans,
 			  a.size1(), b.size2(), a.size2(),
-			  ONE_FLOAT_COMPLEX, (cl_mem)a.data().begin().get_buffer().get(), 0, lda,
-			  (cl_mem)b.data().begin().get_buffer().get(), 0, ldb, ONE_FLOAT_COMPLEX,
-			  (cl_mem)result.data().begin().get_buffer().get(), 0, ldc,
+			  ONE_FLOAT_COMPLEX, (cl_mem)a.begin().get_buffer().get(), 0, lda,
+			  (cl_mem)b.begin().get_buffer().get(), 0, ldb, ONE_FLOAT_COMPLEX,
+			  (cl_mem)result.begin().get_buffer().get(), 0, ldc,
 			  1, &(queue.get()), 0, NULL, &event);
 
 		  else if (std::is_same<T, std::complex<double>>::value)
 			//Call clBLAS extended function. Perform gemm for double
 			clblasZgemm(Order, clblasNoTrans, clblasNoTrans,
 			  a.size1(), b.size2(), a.size2(),
-			  ONE_DOUBLE_COMPLEX, (cl_mem)a.data().begin().get_buffer().get(), 0, lda,
-			  (cl_mem)b.data().begin().get_buffer().get(), 0, ldb, ONE_DOUBLE_COMPLEX,
-			  (cl_mem)result.data().begin().get_buffer().get(), 0, ldc,
+			  ONE_DOUBLE_COMPLEX, (cl_mem)a.begin().get_buffer().get(), 0, lda,
+			  (cl_mem)b.begin().get_buffer().get(), 0, ldb, ONE_DOUBLE_COMPLEX,
+			  (cl_mem)result.begin().get_buffer().get(), 0, ldc,
 			  1, &(queue.get()), 0, NULL, &event);
 
 
@@ -123,18 +121,18 @@ namespace boost {
 		*/
 		template <class T, class F, class A>
 		BOOST_UBLAS_INLINE
-		  void prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, ublas::matrix<T, F, A>& result, opencl_device& device)
+		  void prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, ublas::matrix<T, F, A>& result, compute::command_queue &queue)
 		{
 
 		  ///copy the data from a to aHolder
-		  ublas::matrix<T, F, opencl::storage> aHolder(device);
+		  ublas::matrix<T, F, opencl::storage> aHolder(a.size1(), a.size2(), queue);
 		  aHolder.to_host(a);
 
 		  ///copy the data from b to bHolder
-		  ublas::matrix<T, F, opencl::storage> bHolder(device);
+		  ublas::matrix<T, F, opencl::storage> bHolder(b.size1(), b.size2() ,queue);
 		  bHolder.to_host(b);
 
-		  ublas::matrix<T, F, opencl::storage> resultHolder(device);
+		  ublas::matrix<T, F, opencl::storage> resultHolder(a.size1(), b.size2(), queue);
 
 		  prod(aHolder, bHolder, resultHolder); //call the prod function that multiplies a function already on gpu
 
@@ -159,10 +157,10 @@ namespace boost {
 
 		template <class T, class F, class A>
 		BOOST_UBLAS_INLINE
-		  ublas::matrix<T, F, A> prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, opencl_device device)
+		  ublas::matrix<T, F, A> prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, compute::command_queue &queue)
 		{
-		  ublas::matrix<T, F, A> result;
-		  prod(a, b, result, device);
+		  ublas::matrix<T, F, A> result(a.size1(), b.size2());
+		  prod(a, b, result, queue);
 		  return result;
 		}
 
