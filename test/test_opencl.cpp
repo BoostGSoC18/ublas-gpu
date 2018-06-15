@@ -5,27 +5,27 @@ int main()
 {
 
 	///testing row major flaot prod
-	bench_prod<float, ublas::basic_row_major<>, 100, 100> b1;
+	bench_prod<float, ublas::basic_row_major<>, 10, 10> b1;
 
 	///testing row major double prod
-	bench_prod<double, ublas::basic_row_major<>, 100, 100> b2;
+	bench_prod<double, ublas::basic_row_major<>, 10, 10> b2;
 
 	///testing row major complex float prod
-	bench_prod<std::complex<float>, ublas::basic_row_major<>, 100, 100> b5;
+	bench_prod<std::complex<float>, ublas::basic_row_major<>, 10, 10> b5;
 
 	///testing row major complex double prod
-	bench_prod<std::complex<double>, ublas::basic_row_major<>, 100, 100> b6;
+	bench_prod<std::complex<double>, ublas::basic_row_major<>, 10, 10> b6;
 
 	///testing column major flaot prod
-	bench_prod<float, ublas::basic_column_major<>, 100, 100> b3;
+	bench_prod<float, ublas::basic_column_major<>, 10, 10> b3;
 	///testing column major double prod
-	bench_prod<double, ublas::basic_column_major<>, 100, 100> b4;
+	bench_prod<double, ublas::basic_column_major<>, 10, 10> b4;
 
 	///testing column major complex float prod
-	bench_prod<std::complex<float>, ublas::basic_column_major<>, 100, 100> b7;
+	bench_prod<std::complex<float>, ublas::basic_column_major<>, 10, 10> b7;
 
 	///testing column major complex double prod
-	bench_prod<std::complex<double>, ublas::basic_column_major<>, 100, 100> b8;
+	bench_prod<std::complex<double>, ublas::basic_column_major<>, 10, 10> b8;
 
 	std::cout << "Row major:" << std::endl;
 	b1.run();
