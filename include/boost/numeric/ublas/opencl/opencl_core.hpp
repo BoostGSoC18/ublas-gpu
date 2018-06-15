@@ -22,17 +22,25 @@ namespace opencl
   class storage;
 
 
-  ///start clBlas (used for the matrix product kernel
-  inline void startOpencl()
+  ///a class to initialize and finalize library
+  class library
   {
-	clblasSetup();
-  }
 
-  /// Finalize clBLAS (used for the matrix product kernel)
-  inline void endOpencl()
-  {
-	clblasTeardown();
-  }
+  public:
+
+	///start clBlas (used for the matrix product kernel
+	library()
+	{
+	  clblasSetup();
+	}
+
+	/// Finalize clBLAS (used for the matrix product kernel)
+	~library()
+	{
+	  clblasTeardown();
+	}
+
+  };
 
 
 

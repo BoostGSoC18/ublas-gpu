@@ -45,7 +45,7 @@ public:
 
   void run()
   {
-
+	opencl::library lib;
 	int passedOperations = 0;
 	// get default device and setup context
 	compute::device device = compute::system::devices().at(0);
@@ -53,8 +53,6 @@ public:
 	compute::command_queue queue(context, device);
 
 	std::srand(time(0));
-
-	opencl::startOpencl();
 
 	ublas::matrix<T, F> a;
 	ublas::matrix<T, F> b;
@@ -92,7 +90,6 @@ public:
 
 	}
 	std::cout << "All is well (matrix opencl prod) of " << typeid(T).name() << std::endl;
-	opencl::endOpencl();
 
 
 

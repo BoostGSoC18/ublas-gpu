@@ -79,10 +79,9 @@ void bench_difference(int dimension, int times, compute::command_queue& queue)
 
 int main()
 {
-
+  opencl::library lib;
   std::srand(time(0));
 
-  opencl::startOpencl();
   // get default device and setup context
   compute::device device = compute::system::devices().at(0);
   compute::context context(device);
@@ -96,6 +95,5 @@ int main()
 
 
 
-  opencl::endOpencl();
   return 0;
 }
