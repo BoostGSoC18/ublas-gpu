@@ -80,13 +80,14 @@ public:
   * \param q is the boost::compute::command_queue that contains the matrix on its device memory
   * \param size1 number of rows
   * \param size2 number of columns
+  * \param context is the context that the matrix will be stored on
   */
 
-  matrix(size_type size1, size_type size2, compute::command_queue &q)
+  matrix(size_type size1, size_type size2, compute::context c)
 	: matrix_container<self_type>(),
-	size1_(size1), size2_(size2), queue_(q)
+	size1_(size1), size2_(size2), device_(c.get_device())
   {
-	compute::buffer_allocator<T> allocator(q.get_context());
+	compute::buffer_allocator<T> allocator(c);
 	data_ = allocator.allocate(layout_type::storage_size(size1, size2)).get_buffer();
   }
 
@@ -95,12 +96,13 @@ public:
   * \param 2 is the boost::compute::command_queue that contains the matrix on its device memory
   * \param size1 number of rows
   * \param size2 number of columns
+  * \param q is the command queue of the device which will store the matrix and do the filling
   * \param value is the value that all elements of the matrix are set to
   */
 
   matrix(size_type size1, size_type size2, compute::command_queue &q, const T& value)
 	: matrix_container<self_type>(),
-	size1_(size1), size2_(size2), queue_(q)
+	size1_(size1), size2_(size2), device_(q.get_device())
   {
 	compute::buffer_allocator<T> allocator(q.get_context());
 	data_ = allocator.allocate(layout_type::storage_size(size1, size2)).get_buffer();
@@ -140,49 +142,58 @@ public:
   * about the device that the matrix resides on.
   */
 
-  const compute::command_queue &queue() const { return queue_; }
+  const compute::device &device() const { return device_; }
 
 
-  compute::command_queue &queue() { return queue_; }
+  compute::device &device() { return device_; }
 
 
   /**Fill all elements of the matrix with the value
   * \param value value to set all elements of the matrix to
+  * \param queue is the command queue that will execute the operation
   */
 
-  void fill(T value)
+  void fill(T value, compute::command_queue & queue)
   {
-	compute::fill(this->begin(), this->end(), value, queue_);
+	assert(device_ == queue.get_device());
+
+	compute::fill(this->begin(), this->end(), value, queue);
   }
 
   /** Copies a matrix to a device
   * \param m is a matrix that is not on the device _device and it is copied to it
+  * \param queue is the command queue that will execute the operation
   */
 
   template<class A>
-  void to_host(ublas::matrix<T, L, A>& m)
+  void to_host(ublas::matrix<T, L, A>& m, compute::command_queue & queue)
   {
+	assert(device_ == queue.get_device());
+
 	compute::copy(
 	  m.data().begin(),
 	  m.data().end(),
 	  this->begin(),
-	  queue_
+	  queue
 	);
   }
 
 
   /** Copies a matrix from a device
   * \param m is a matrix that will be reized to (size1_,size2) and the values of (*this) will be copied in it
+  * \param queue is the command queue that will execute the operation
   */
 
   template<class A>
-  void from_host(ublas::matrix<T, L, A>& m)
+  void from_host(ublas::matrix<T, L, A>& m , compute::command_queue& queue)
   {
+	assert(device_ == queue.get_device());
+
 	compute::copy(
 	  this->begin(),
 	  this->end(),
 	  m.data().begin(),
-	  queue_
+	  queue
 	);
   }
 
@@ -191,7 +202,7 @@ private:
   size_type size1_;
   size_type size2_;
   compute::buffer data_;
-  compute::command_queue queue_;
+  compute::device device_;
 };
 }//ublas
 }//numeric

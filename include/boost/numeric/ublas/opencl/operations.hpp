@@ -30,22 +30,18 @@ namespace ublas = boost::numeric::ublas;
 * \param a matrix A of the product (A*B) that is on device
 * \param b matrix B of the product (A*B) that is on the device
 * \param result matrix on device to store the product of the result of (A*B)
+* \param queue has the queue of the device which has the result matrix and which will do the computation
 *
 * \tparam T datatype of the matrices
 * \tparam L layout of the matrices (row_majot or column_major)
 */
 template <class T, class F>
-  void prod(ublas::matrix<T, F, opencl::storage>& a, ublas::matrix<T, F, opencl::storage>& b, ublas::matrix<T, F, opencl::storage>& result)
+  void prod(ublas::matrix<T, F, opencl::storage>& a, ublas::matrix<T, F, opencl::storage>& b, ublas::matrix<T, F, opencl::storage>& result , compute::command_queue & queue)
 {
   //check all matrices are on same context
-  assert((a.queue().get_context() == b.queue().get_context()) && (a.queue().get_context() == result.queue().get_context()));
+  assert(  (a.device() == b.device()) && (a.device() == result.device()) );
 
-  //get data from device
-  compute::device device = a.queue().get_device();
-  compute::context context = a.queue().get_context();
-  compute::command_queue queue = a.queue();
-
-  result.fill(0);
+  result.fill(0, queue);
 
   cl_event event = NULL;
 
@@ -124,18 +120,18 @@ template <class T, class F, class A>
 {
 
   ///copy the data from a to aHolder
-  ublas::matrix<T, F, opencl::storage> aHolder(a.size1(), a.size2(), queue);
-  aHolder.to_host(a);
+  ublas::matrix<T, F, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
+  aHolder.to_host(a,queue);
 
   ///copy the data from b to bHolder
-  ublas::matrix<T, F, opencl::storage> bHolder(b.size1(), b.size2() ,queue);
-  bHolder.to_host(b);
+  ublas::matrix<T, F, opencl::storage> bHolder(b.size1(), b.size2() ,queue.get_context());
+  bHolder.to_host(b,queue);
 
-  ublas::matrix<T, F, opencl::storage> resultHolder(a.size1(), b.size2(), queue);
+  ublas::matrix<T, F, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
 
-  prod(aHolder, bHolder, resultHolder); //call the prod function that multiplies a function already on gpu
+  prod(aHolder, bHolder, resultHolder, queue); //call the prod function that multiplies a function already on gpu
 
-  resultHolder.from_host(result);
+  resultHolder.from_host(result,queue);
 
 
 }
@@ -147,7 +143,7 @@ template <class T, class F, class A>
 *
 * \param a matrix A of the product (A*B) that is not on opencl_device device
 * \param b matrix B of the product (A*B) that is not on the opencl_device device
-* \param queue has the queue of the device which will do the computation
+* \param queue has the queue of the device which has the result matrix and which will do the computation
 *
 * \tparam T datatype of the matrices
 * \tparam L layout of the matrices (row_majot or column_major)
