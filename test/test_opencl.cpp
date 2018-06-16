@@ -34,7 +34,7 @@ int main()
 	b6.run();
 
 	std::cout << "Column major:" << std::endl;
-	b2.run();
+	b3.run();
 	b4.run();
 	b7.run();
 	b8.run();
