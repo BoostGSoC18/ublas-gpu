@@ -39,7 +39,7 @@ template <class T, class F>
   void prod(ublas::matrix<T, F, opencl::storage>& a, ublas::matrix<T, F, opencl::storage>& b, ublas::matrix<T, F, opencl::storage>& result , compute::command_queue & queue)
 {
   //check all matrices are on same context
-  assert(  (a.device() == b.device()) && (a.device() == result.device()) );
+  assert(  (a.device() == b.device()) && (a.device() == result.device()) && (a.device()== queue.get_device()) );
 
   result.fill(0, queue);
 

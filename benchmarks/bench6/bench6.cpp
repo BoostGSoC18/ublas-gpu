@@ -16,21 +16,6 @@ ublas::matrix<DATA_TYPE> b;
 ublas::matrix<DATA_TYPE> result;
 
 
-void run_prod_opencl(int number_of_times, compute::command_queue& queue)
-{
-  for (int i = 0; i < number_of_times; i++)
-  {
-	result = opencl::prod(a, b, queue);
-  }
-}
-
-void run_prod_ublas(int number_of_times)
-{
-  for (int i = 0; i < number_of_times; i++)
-  {
-	result = prod(a, b);
-  }
-}
 
 template <class T>
 void init_matrix(ublas::matrix<T>& m, int max_value)
@@ -43,7 +28,7 @@ void init_matrix(ublas::matrix<T>& m, int max_value)
   }
 }
 
-void header(char* str, int dimension)
+void header(const char* str, int dimension)
 {
   std::cout << str << dimension << "x" << dimension << std::endl;
 }
@@ -57,25 +42,45 @@ void init_all(int dimension)
 }
 
 
-void bench_difference(int dimension, int times, compute::command_queue& queue)
+void bench_prod_with_copying(int dimension,  compute::command_queue& queue)
 {
   init_all(dimension);
 
-  header("opnecl prod : ", dimension);
+  header("opnecl prod (with copying to host): ", dimension);
   boost::timer t1;
-  run_prod_opencl(times, queue);
+  opencl::prod(a, b, queue);
   std::cout << "time taken = " << t1.elapsed() << " s" << std::endl;
-
-
-  // header("ublas prod : ", dimension);
-  // boost::timer t0;
-  // run_prod_ublas(times);
-  // std::cout << "time taken = " << t0.elapsed() << " s" << std::endl;
-
 
   std::cout << std::endl;
 
 }
+
+
+void bench_prod_without_copying(int dimension, compute::command_queue& queue)
+{
+  init_all(dimension);
+
+
+  ublas::matrix<DATA_TYPE, ublas::basic_row_major<>, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
+  aHolder.to_host(a, queue);
+
+  ublas::matrix<DATA_TYPE, ublas::basic_row_major<>, opencl::storage> bHolder(b.size1(), b.size2(), queue.get_context());
+  aHolder.to_host(b, queue);
+
+  ublas::matrix<DATA_TYPE, ublas::basic_row_major<>, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
+
+
+  header("opnecl prod (without copying to host): ", dimension);
+  boost::timer t1;
+  opencl::prod(aHolder, bHolder, resultHolder, queue);
+  std::cout << "time taken = " << t1.elapsed() << " s" << std::endl;
+
+  std::cout << std::endl;
+
+}
+
+
+
 
 int main()
 {
@@ -87,12 +92,30 @@ int main()
   compute::context context(device);
   compute::command_queue queue(context, device);
 
-  bench_difference(100, 1, queue);
-  bench_difference(200, 1, queue);
-  bench_difference(500, 1, queue);
-  bench_difference(1000, 1, queue);
-  bench_difference(1500, 1, queue);
+  bench_prod_with_copying(100, queue);
+  bench_prod_without_copying(100, queue);
 
+
+  bench_prod_with_copying(200, queue);
+  bench_prod_without_copying(200, queue);
+
+
+  bench_prod_with_copying(500, queue);
+  bench_prod_without_copying(500, queue);
+
+
+
+  bench_prod_with_copying(1000, queue);
+  bench_prod_without_copying(1000, queue);
+
+
+
+  bench_prod_with_copying(1500, queue);
+  bench_prod_without_copying(1500, queue);
+
+
+  bench_prod_with_copying(2000, queue);
+  bench_prod_without_copying(2000, queue);
 
 
   return 0;
