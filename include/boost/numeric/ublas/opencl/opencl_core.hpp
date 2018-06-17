@@ -76,13 +76,19 @@ public:
 
   // Construction
 
+  /** Dense matrix constructor with size (0,0)
+  */
+  matrix()
+	: matrix_container<self_type>(),
+	size1_(0), size2_(0), data_() , device_() {}
+
+
   /** Dense matrix constructor with size (size1,size2) and resides on memory of device of queue q
   * \param q is the boost::compute::command_queue that contains the matrix on its device memory
   * \param size1 number of rows
   * \param size2 number of columns
   * \param context is the context that the matrix will be stored on
   */
-
   matrix(size_type size1, size_type size2, compute::context c)
 	: matrix_container<self_type>(),
 	size1_(size1), size2_(size2), device_(c.get_device())
@@ -92,6 +98,7 @@ public:
   }
 
 
+
   /** Dense matrix constructor with size (size1,size2) and resides on memory of device of queue q and initialize all elements to value
   * \param 2 is the boost::compute::command_queue that contains the matrix on its device memory
   * \param size1 number of rows
@@ -99,7 +106,6 @@ public:
   * \param q is the command queue of the device which will store the matrix and do the filling
   * \param value is the value that all elements of the matrix are set to
   */
-
   matrix(size_type size1, size_type size2, compute::command_queue &q, const T& value)
 	: matrix_container<self_type>(),
 	size1_(size1), size2_(size2), device_(q.get_device())
@@ -111,24 +117,22 @@ public:
   }
 
 
+
   // Accessors
   /** Return the number of rows of the matrix
   */
-
   size_type size1() const {
 	return size1_;
   }
 
   /** Return the number of colums of the matrix
   */
-
   size_type size2() const {
 	return size2_;
   }
 
   /** Return the compute::buffer that has the begin data on the device
   */
-
   const compute::buffer_iterator<T> begin() const { compute::make_buffer_iterator<T>(data_); }
   compute::buffer_iterator<T> begin() { return compute::make_buffer_iterator<T>(data_); }
 
@@ -141,18 +145,13 @@ public:
   /** Return boost::numeri::ublas::opencl::queue that has informaton
   * about the device that the matrix resides on.
   */
-
   const compute::device &device() const { return device_; }
-
-
   compute::device &device() { return device_; }
-
 
   /**Fill all elements of the matrix with the value
   * \param value value to set all elements of the matrix to
   * \param queue is the command queue that will execute the operation
   */
-
   void fill(T value, compute::command_queue & queue)
   {
 	assert(device_ == queue.get_device());
@@ -164,7 +163,6 @@ public:
   * \param m is a matrix that is not on the device _device and it is copied to it
   * \param queue is the command queue that will execute the operation
   */
-
   template<class A>
   void to_host(ublas::matrix<T, L, A>& m, compute::command_queue & queue)
   {
@@ -183,7 +181,6 @@ public:
   * \param m is a matrix that will be reized to (size1_,size2) and the values of (*this) will be copied in it
   * \param queue is the command queue that will execute the operation
   */
-
   template<class A>
   void from_host(ublas::matrix<T, L, A>& m , compute::command_queue& queue)
   {

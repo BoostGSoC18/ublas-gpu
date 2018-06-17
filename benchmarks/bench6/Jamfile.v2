@@ -5,8 +5,8 @@ import ac ;
 using opencl ;
 using clblas ;
 
-exe bench6
-    : bench6.cpp
+exe prod
+    : prod.cpp
     :
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
