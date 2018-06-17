@@ -5,6 +5,8 @@
 #include "benchmark.hpp"
 #include <new>
 
+#define DEVICE_NUMBER 2
+
 namespace ublas = boost::numeric::ublas;
 namespace opencl = boost::numeric::ublas::opencl;
 namespace compute = boost::compute;
@@ -49,7 +51,7 @@ public:
   prod_opencl_copying() : benchmark("prod opencl with copying data") {}
   virtual void setup(long l)
   {
-	compute::device device = compute::system::devices().at(2);
+	compute::device device = compute::system::devices().at(DEVICE_NUMBER);
 	compute::context context(device);
 	queue = compute::command_queue(context, device);
 
@@ -83,7 +85,7 @@ public:
   prod_opencl_no_copying() : benchmark("prod opencl without copying data") {}
   virtual void setup(long l)
   {
-	compute::device device = compute::system::devices().at(2);
+	compute::device device = compute::system::devices().at(DEVICE_NUMBER);
 	compute::context context(device);
 	queue = compute::command_queue(context, device);
 

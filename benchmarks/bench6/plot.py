@@ -11,8 +11,6 @@ def load_and_plot_file(file_name):
         time = int(arr[1])
         x.append(int(size))
         y.append(int(time))
-    print(x)
-    print(y)
     plt.plot(x, y, label=file_name)
 
 
