@@ -121,17 +121,17 @@ template <class T, class F, class A>
 
   ///copy the data from a to aHolder
   ublas::matrix<T, F, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
-  aHolder.to_host(a,queue);
+  aHolder.from_host(a,queue);
 
   ///copy the data from b to bHolder
   ublas::matrix<T, F, opencl::storage> bHolder(b.size1(), b.size2() ,queue.get_context());
-  bHolder.to_host(b,queue);
+  bHolder.from_host(b,queue);
 
   ublas::matrix<T, F, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
 
   prod(aHolder, bHolder, resultHolder, queue); //call the prod function that multiplies a function already on gpu
 
-  resultHolder.from_host(result,queue);
+  resultHolder.to_host(result,queue);
 
 
 }

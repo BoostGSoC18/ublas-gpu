@@ -114,6 +114,8 @@ public:
 	data_ = allocator.allocate(layout_type::storage_size(size1, size2)).get_buffer();
 
 	compute::fill(this->begin(), this->end(), value, q);
+
+	q.finish();
   }
 
 
@@ -142,7 +144,7 @@ public:
   compute::buffer_iterator<T> end() { return compute::make_buffer_iterator<T>(data_, layout_type::storage_size(size1_, size2_)); }
   const compute::buffer_iterator<T> end() const { return compute::make_buffer_iterator<T>(data_, layout_type::storage_size(size1_, size2_)); }
 
-  /** Return boost::numeri::ublas::opencl::queue that has informaton
+  /** Return boost::numeri::ublas::opencl::device that has informaton
   * about the device that the matrix resides on.
   */
   const compute::device &device() const { return device_; }
@@ -157,6 +159,8 @@ public:
 	assert(device_ == queue.get_device());
 
 	compute::fill(this->begin(), this->end(), value, queue);
+
+	queue.finish();
   }
 
   /** Copies a matrix to a device
@@ -164,7 +168,7 @@ public:
   * \param queue is the command queue that will execute the operation
   */
   template<class A>
-  void to_host(ublas::matrix<T, L, A>& m, compute::command_queue & queue)
+  void from_host(ublas::matrix<T, L, A>& m, compute::command_queue & queue)
   {
 	assert(device_ == queue.get_device());
 
@@ -174,6 +178,8 @@ public:
 	  this->begin(),
 	  queue
 	);
+
+	queue.finish();
   }
 
 
@@ -182,7 +188,7 @@ public:
   * \param queue is the command queue that will execute the operation
   */
   template<class A>
-  void from_host(ublas::matrix<T, L, A>& m , compute::command_queue& queue)
+  void to_host(ublas::matrix<T, L, A>& m , compute::command_queue& queue)
   {
 	assert(device_ == queue.get_device());
 
@@ -192,6 +198,8 @@ public:
 	  m.data().begin(),
 	  queue
 	);
+
+	queue.finish();
   }
 
 
@@ -201,9 +209,108 @@ private:
   compute::buffer data_;
   compute::device device_;
 };
+
+
+
+
+template <class T>
+class vector<T, opencl::storage> : public boost::compute::vector<T>
+{
+  typedef std::size_t size_type;
+
+public:
+
+  // Construction
+
+
+  /**vector constructor with size 0 on default context
+  */
+  vector() : compute::vector<T>() {}
+
+  /**vector constructor with size (size) on a specific context
+  * \param size is the size that will be initially allocated for the vector
+  * \param context is the context that the data will be stored on
+  */
+  vector(size_type size, compute::context context) : compute::vector<T>(size, context) {}
+
+  /**vector constructor with size (size) on a specific context and initialize it to a value
+  * \param size is the size that will be initially allocated for the vector
+  * \param value is the initial value for all the vector
+  * \param queue is the context that the data will be stored on it context
+  */
+  vector(size_type size,T value, compute::command_queue queue) : compute::vector<T>(size,value,  queue) {
+	queue.finish();
+  }
+
+
+  /** Return boost::numeri::ublas::opencl::device that has informaton
+  * about the device that the vecutor resides on.
+  */
+  const compute::device device() const { return this->default_queue().get_device(); }
+  compute::device device() { return this->default_queue().get_device(); }
+
+
+
+  /** Copies a vector to a device
+  * \param v is a vector that is not on the same device and it is copied to it
+  * \param queue is the command queue that will execute the operation
+  */
+  template<class A>
+  void from_host(ublas::vector<T, A>& v, compute::command_queue & queue)
+  {
+	assert(this->device() == queue.get_device());
+
+	compute::copy(
+	  v.begin(),
+	  v.end(),
+	  this->begin(),
+	  queue
+	);
+
+	queue.finish();
+  }
+
+
+  /** Copies a vector from a device
+  * \param v is a vector that will be reized to (size_) and the values of (*this) will be copied in it
+  * \param queue is the command queue that will execute the operation
+  */
+  template<class A>
+  void to_host(ublas::vector<T, A>& v, compute::command_queue& queue)
+  {
+	assert(this->device() == queue.get_device());
+
+	compute::copy(
+	  this->begin(),
+	  this->end(),
+	  v.begin(),
+	  queue
+	);
+
+	queue.finish();
+
+  }
+
+  /**Fill all elements of the vector with the value
+  * \param value value to set all elements of the matrix to
+  * \param queue is the command queue that will execute the operation
+  */
+  void fill(T value, compute::command_queue & queue)
+  {
+	assert(this->device() == queue.get_device());
+
+	compute::fill(this->begin(), this->end(), value, queue);
+	
+	queue.finish();
+  }
+};
+
 }//ublas
 }//numeric
 }//boost
+
+
+
 
 
 #endif 
