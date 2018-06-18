@@ -231,7 +231,7 @@ public:
   * \param size is the size that will be initially allocated for the vector
   * \param context is the context that the data will be stored on
   */
-  vector(size_type size, compute::context context) : compute::vector<T>(size, context) {}
+  vector(size_type size, compute::context context) : compute::vector<T>(size, context) { device_ = context.get_device(); }
 
   /**vector constructor with size (size) on a specific context and initialize it to a value
   * \param size is the size that will be initially allocated for the vector
@@ -240,14 +240,15 @@ public:
   */
   vector(size_type size,T value, compute::command_queue queue) : compute::vector<T>(size,value,  queue) {
 	queue.finish();
+	device_ = queue.get_device();
   }
 
 
   /** Return boost::numeri::ublas::opencl::device that has informaton
   * about the device that the vecutor resides on.
   */
-  const compute::device device() const { return this->default_queue().get_device(); }
-  compute::device device() { return this->default_queue().get_device(); }
+  const compute::device device() const { return device_; }
+  compute::device device() { return device_; }
 
 
 
@@ -303,6 +304,9 @@ public:
 	
 	queue.finish();
   }
+
+private:
+  compute::device device_;
 };
 
 }//ublas

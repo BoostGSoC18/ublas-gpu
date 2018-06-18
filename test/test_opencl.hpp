@@ -1,3 +1,5 @@
+#ifndef TEST_OPENCL_HH
+#define TEST_OPENCL_HH
 #include <stdio.h>
 
 #define ENABLE_OPENCL
@@ -30,6 +32,22 @@ class bench_prod
 
   }
 
+
+  bool compare(ublas::vector<T>& a, ublas::vector<T>& b)
+  {
+	if (a.size() != b.size())
+	  return false;
+
+	for (int i = 0; i<a.size(); i++)
+	  if (a[i] != b[i])
+		return false;
+
+	return true;
+
+  }
+
+
+
   void init_matrix(ublas::matrix<T, F>& m, int max_value)
   {
 	for (int i = 0; i < m.size1(); i++)
@@ -39,6 +57,16 @@ class bench_prod
 
 	}
   }
+
+
+  void init_vector(ublas::vector<T>& v, int max_value)
+  {
+	for (int i = 0; i <v.size(); i++)
+	{
+	  v[i] = std::rand() % max_value;
+	}
+  }
+
 
 public:
 
@@ -58,6 +86,13 @@ public:
 	ublas::matrix<T, F> b;
 	ublas::matrix<T, F> resultUBLAS;
 	ublas::matrix<T, F> resultOPENCL;
+	ublas::vector<T> va;
+	ublas::vector<T> vb;
+	ublas::vector<T> result_vector_ublas_mv;
+	ublas::vector<T> result_vector_ublas_vm;
+	ublas::vector<T> result_vector_opencl_mv;
+	ublas::vector<T> result_vector_opencl_vm;
+
 
 
 	for (int i = 0; i<number_of_tests; i++)
@@ -68,17 +103,31 @@ public:
 
 	  a.resize(rowsA, colsA);
 	  b.resize(colsA, colsB);
+	  va.resize(colsA);
+	  vb.resize(rowsA);
 
 
 	  init_matrix(a, 200);
 	  init_matrix(b, 200);
+	  init_vector(va, 200);
+	  init_vector(vb, 200);
 
-
+	  //matrix_matrix
 	  resultUBLAS = prod(a, b);
 	  resultOPENCL = opencl::prod(a, b, queue);
 
 
-	  if (!compare(resultUBLAS, resultOPENCL))
+	  //matrix_vector
+	  result_vector_ublas_mv = ublas::prod(a, va);
+	  result_vector_opencl_mv = opencl::prod(a, va, queue);
+
+
+	  //vector-matrix
+	  result_vector_ublas_vm = ublas::prod(vb, a);
+	  result_vector_opencl_vm = opencl::prod(vb, a, queue);
+
+
+	  if ((!compare(resultUBLAS, resultOPENCL)) || (!compare(result_vector_opencl_mv, result_vector_ublas_mv)) || (!compare(result_vector_opencl_vm, result_vector_ublas_vm)))
 	  {
 		std::cout << "Error in calculations" << std::endl;
 
@@ -96,3 +145,5 @@ public:
   }
 
 };
+
+#endif
