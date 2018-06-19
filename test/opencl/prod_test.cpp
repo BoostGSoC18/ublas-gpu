@@ -1,4 +1,4 @@
-#include "test_opencl.hpp"
+#include "prod_test.hpp"
 #include <boost/numeric/ublas/matrix.hpp>
 
 int main()
