@@ -258,7 +258,7 @@ test-suite numeric/uBLAS
       [ run test_matrix_vector.cpp
       ]
 
-      [ run test_opencl.cpp
+      [ run opencl/prod_test.cpp
       : # args
       : # input files
       : # requirements
