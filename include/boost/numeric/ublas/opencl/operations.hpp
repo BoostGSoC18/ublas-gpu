@@ -37,8 +37,8 @@ namespace ublas = boost::numeric::ublas;
 * \tparam T datatype of the matrices
 * \tparam L layout of the matrices (row_major or column_major)
 */
-template <class T, class F>
-  void prod(ublas::matrix<T, F, opencl::storage>& a, ublas::matrix<T, F, opencl::storage>& b, ublas::matrix<T, F, opencl::storage>& result , compute::command_queue & queue)
+template <class T, class L>
+  void prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result , compute::command_queue & queue)
 {
   //check all matrices are on same context
   assert(  (a.device() == b.device()) && (a.device() == result.device()) && (a.device()== queue.get_device()) );
@@ -50,7 +50,7 @@ template <class T, class F>
 
   cl_event event = NULL;
 
-  clblasOrder Order = std::is_same<F, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
+  clblasOrder Order = std::is_same<L, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
   int lda = Order == clblasRowMajor ? a.size2() : a.size1();
   int ldb = Order == clblasRowMajor ? b.size2() : a.size2();
   int ldc = Order == clblasRowMajor ? b.size2() : a.size1();
@@ -120,21 +120,21 @@ template <class T, class F>
 * \tparam L layout of the matrices (row_major or column_major)
 * \tparam A storage type that has the data of the matrices
 */
-template <class T, class F, class A>
-  void prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, ublas::matrix<T, F, A>& result, compute::command_queue &queue)
+template <class T, class L, class A>
+  void prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
 {
 
   ///copy the data from a to aHolder
-  ublas::matrix<T, F, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
+  ublas::matrix<T, L, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
   aHolder.from_host(a,queue);
 
   ///copy the data from b to bHolder
-  ublas::matrix<T, F, opencl::storage> bHolder(b.size1(), b.size2() ,queue.get_context());
+  ublas::matrix<T, L, opencl::storage> bHolder(b.size1(), b.size2() ,queue.get_context());
   bHolder.from_host(b,queue);
 
-  ublas::matrix<T, F, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
+  ublas::matrix<T, L, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
 
-  prod(aHolder, bHolder, resultHolder, queue); //call the prod function that multiplies a function already on gpu
+  prod(aHolder, bHolder, resultHolder, queue); //call the prod function that multiplies
 
   resultHolder.to_host(result,queue);
 
@@ -155,10 +155,10 @@ template <class T, class F, class A>
 * \tparam A storage type that has the data of the matrices
 */
 
-template <class T, class F, class A>
-  ublas::matrix<T, F, A> prod(ublas::matrix<T, F, A>& a, ublas::matrix<T, F, A>& b, compute::command_queue &queue)
+template <class T, class L, class A>
+  ublas::matrix<T, L, A> prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
 {
-  ublas::matrix<T, F, A> result(a.size1(), b.size2());
+  ublas::matrix<T, L, A> result(a.size1(), b.size2());
   prod(a, b, result, queue);
   return result;
 }
@@ -181,8 +181,8 @@ template <class T, class F, class A>
   * \tparam T datatype of the data
   * \tparam L layout of the matrix (row_major or column_major)
   */
-  template <class T, class F>
-  void prod(ublas::matrix<T, F, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue & queue)
+  template <class T, class L>
+  void prod(ublas::matrix<T, L, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue & queue)
   {
 	//check all matrices are on same context
 	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
@@ -196,7 +196,7 @@ template <class T, class F, class A>
 
 	cl_event event = NULL;
 
-	clblasOrder Order = std::is_same<F, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
+	clblasOrder Order = std::is_same<L, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
 	int lda = Order == clblasRowMajor ? a.size2() : a.size1();
 	int ldb = Order == clblasRowMajor ? 1 : a.size2();
 	int ldc = Order == clblasRowMajor ? 1 : a.size1();
@@ -264,12 +264,12 @@ template <class T, class F, class A>
   * \tparam L layout of the matrices (row_major or column_major)
   * \tparam A storage type that has the data of the matrix and the vector
   */
-  template <class T, class F, class A>
-  void prod(ublas::matrix<T, F, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  template <class T, class L, class A>
+  void prod(ublas::matrix<T, L, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
   {
 
 	///copy the data from a to aHolder
-	ublas::matrix<T, F, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
+	ublas::matrix<T, L, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
 	aHolder.from_host(a, queue);
 
 	///copy the data from b to bHolder
@@ -278,7 +278,7 @@ template <class T, class F, class A>
 
 	ublas::vector<T, opencl::storage> resultHolder(a.size1(), queue.get_context());
 
-	prod(aHolder, bHolder, resultHolder, queue); //call the prod function that multiplies a function already on gpu
+	prod(aHolder, bHolder, resultHolder, queue); //call the prod function that multiplies
 
 	resultHolder.to_host(result, queue);
 
@@ -299,8 +299,8 @@ template <class T, class F, class A>
   * \tparam A storage type that has the data of the matrix and the vector
   */
 
-  template <class T, class F, class A>
-  ublas::vector<T, A> prod(ublas::matrix<T, F, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
+  template <class T, class L, class A>
+  ublas::vector<T, A> prod(ublas::matrix<T, L, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
   {
 	ublas::vector<T, A> result(a.size1());
 	prod(a, b, result, queue);
@@ -322,14 +322,14 @@ template <class T, class F, class A>
   * \tparam T datatype 
   * \tparam L layout of the matrix (row_major or column_major)
   */
-  template <class T, class F>
-  void prod(ublas::vector<T, opencl::storage>& a, ublas::matrix<T, F, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue & queue)
+  template <class T, class L>
+  void prod(ublas::vector<T, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue & queue)
   {
 	//check all matrices are on same context
 	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
 
 
-	//check dimension of matricx and vector (1xN) * (NxM)
+	//check dimension of matrix and vector (1xN) * (NxM)
 	assert(a.size() == b.size1());
 
 
@@ -337,7 +337,7 @@ template <class T, class F, class A>
 
 	cl_event event = NULL;
 
-	clblasOrder Order = std::is_same<F, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
+	clblasOrder Order = std::is_same<L, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
 	int lda = Order == clblasRowMajor ? a.size() : 1;
 	int ldb = Order == clblasRowMajor ? b.size2() : a.size();
 	int ldc = Order == clblasRowMajor ? b.size2() : 1;
@@ -407,8 +407,8 @@ template <class T, class F, class A>
   * \tparam L layout of the matrix (row_major or column_major)
   * \tparam A storage type that has the data
   */
-  template <class T, class F, class A>
-  void prod(ublas::vector<T, A>& a, ublas::matrix<T, F, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  template <class T, class L, class A>
+  void prod(ublas::vector<T, A>& a, ublas::matrix<T, L, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
   {
 
 	///copy the data from a to aHolder
@@ -416,12 +416,12 @@ template <class T, class F, class A>
 	aHolder.from_host(a, queue);
 
 	///copy the data from b to bHolder
-	ublas::matrix<T, F, opencl::storage> bHolder(b.size1(), b.size2(), queue.get_context());
+	ublas::matrix<T, L, opencl::storage> bHolder(b.size1(), b.size2(), queue.get_context());
 	bHolder.from_host(b, queue);
 
 	ublas::vector<T, opencl::storage> resultHolder(b.size2(), queue.get_context());
 
-	prod(aHolder, bHolder, resultHolder, queue); //call the prod function that multiplies a function already on gpu
+	prod(aHolder, bHolder, resultHolder, queue); //call the prod function that multiplies 
 
 	resultHolder.to_host(result, queue);
 
@@ -442,11 +442,199 @@ template <class T, class F, class A>
   * \tparam A storage type that has the data
   */
 
-  template <class T, class F, class A>
-  ublas::vector<T, A> prod(ublas::vector<T, A>& a, ublas::matrix<T, F, A>& b, compute::command_queue &queue)
+  template <class T, class L, class A>
+  ublas::vector<T, A> prod(ublas::vector<T, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
   {
 	ublas::vector<T, A> result(b.size2());
 	prod(a, b, result, queue);
+	return result;
+  }
+
+
+  //Elements-wise operations
+  
+  //matrix-matrix addition
+  
+
+
+  /**This function computes the summition (element-wise) of 2 matrices (a+b) and stores it at matrix result all 3 matrices are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a matrix A of the summition (A+B) that is on device
+  * \param b matrix B of the summition (A+B) that is on the device
+  * \param result matrix on device to store the result of (A+B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  */
+  template <class T, class L>
+  void add(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  {
+	//check all matrices are on same context
+	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
+
+
+	//check that dimensions of matrices are equal
+	assert( (a.size1() == b.size1()) && (a.size2() == b.size2()) );
+
+	compute::transform(a.begin(),
+	  a.end(),
+	  b.begin(),
+	  result.begin(),
+	  compute::plus<T>(),
+	  queue);
+
+	queue.finish();
+  }
+
+
+  /**This function computes the summition (element-wise) of 2 matrices not on device (a+b) and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  *
+  * \param a matrix A of the summition (A+B) that is not on device
+  * \param b matrix B of the summition (A+B) that is not on the device
+  * \param result matrix on device to store the summitiom of the result of (A+B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam A storage type that has the data of the matrices
+  */
+  template <class T, class L, class A>
+  void add(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  {
+
+	///copy the data from a to aHolder
+	ublas::matrix<T, L, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
+	aHolder.from_host(a, queue);
+
+	///copy the data from b to bHolder
+	ublas::matrix<T, L, opencl::storage> bHolder(b.size1(), b.size2(), queue.get_context());
+	bHolder.from_host(b, queue);
+
+	ublas::matrix<T, L, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
+
+	add(aHolder, bHolder, resultHolder, queue); //call the add function that performs sumition
+
+	resultHolder.to_host(result, queue);
+
+
+  }
+
+
+  /**This function computes the summition (element-wise) of 2 matrices not on device (a+b) and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a matrix A of the summition (A+B) that is not on device (it's on the host)
+  * \param b matrix B of the summition (A+B) that is not on the device (it's on the host)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam A storage type that has the data of the matrices
+  */
+
+  template <class T, class L, class A>
+  ublas::matrix<T, L, A> add(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  {
+	ublas::matrix<T, L, A> result(a.size1(), b.size2());
+	add(a, b, result, queue);
+	return result;
+  }
+
+
+
+
+  //vector-vector addition 
+
+
+  /**This function computes the summition (element-wise) of 2 vectors (a+b) and stores it at matrix result all 3 vectors are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a vector A of the summition (A+B) that is on device
+  * \param b vector B of the summition (A+B) that is on the device
+  * \param result vector on device to store the result of (A+B)
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  */
+  template <class T>
+  void add(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  {
+	//check all vectors are on same device
+	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
+
+
+	//check that dimensions of matrices are equal
+	assert( a.size() == b.size() );
+
+	compute::transform(a.begin(),
+	  a.end(),
+	  b.begin(),
+	  result.begin(),
+	  compute::plus<T>(),
+	  queue);
+
+	queue.finish();
+  }
+
+
+  /**This function computes the summition (element-wise) of 2 vectors not on device (a+b) and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  *
+  * \param a vector A of the summition (A+B) that is not on device
+  * \param b vector B of the summition (A+B) that is not on the device
+  * \param result vector on device to store the summition of the result of (A+B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam A storage type that has the data of the vectors
+  */
+  template <class T, class A>
+  void add(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  {
+
+	///copy the data from a to aHolder
+	ublas::vector<T, opencl::storage> aHolder(a.size(), queue.get_context());
+	aHolder.from_host(a, queue);
+
+	///copy the data from b to bHolder
+	ublas::vector<T, opencl::storage> bHolder(b.size(), queue.get_context());
+	bHolder.from_host(b, queue);
+
+	ublas::vector<T, opencl::storage> resultHolder(a.size(), queue.get_context());
+
+	add(aHolder, bHolder, resultHolder, queue); //call the add function that performs sumition
+
+	resultHolder.to_host(result, queue);
+
+
+  }
+
+
+  /**This function computes the summition (element-wise) of 2 vectors not on device (a+b) and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a vector A of the summition (A+B) that is not on device (it's on the host)
+  * \param b vector B of the summition (A+B) that is not on the device (it's on the host)
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  * \tparam A storage type that has the data of the vectors
+  */
+
+  template <class T, class A>
+  ublas::vector<T, A> add(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
+  {
+	ublas::vector<T, A> result(a.size());
+	add(a, b, result, queue);
 	return result;
   }
 
