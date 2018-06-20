@@ -23,5 +23,4 @@ int main()
   b3.run();
   b4.run();
  
-  return 0;
 }
