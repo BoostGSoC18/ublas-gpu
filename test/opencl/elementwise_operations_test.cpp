@@ -38,4 +38,5 @@ int main()
   b7.run();
   b8.run();
 
+  return 0;
 }

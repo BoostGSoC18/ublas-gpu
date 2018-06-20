@@ -26,7 +26,6 @@ class bench_elementwise
 	  for (int j = 0; j<a.size2(); j++)
 		if (a(i, j) != b(i, j))
 		{
-		  std::cout << a(i, j) << " => " << b(i, j) << std::endl;
 		  return false;
 		}
 	return true;
@@ -42,7 +41,6 @@ class bench_elementwise
 	for (int i = 0; i<a.size(); i++)
 	  if ((a[i] != b[i]))
 	  {
-		std::cout << a[i] << " => " << b[i] << std::endl;
 		return false;
 	  }
 	return true;
