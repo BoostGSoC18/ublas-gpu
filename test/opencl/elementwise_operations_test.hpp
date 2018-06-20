@@ -77,7 +77,7 @@ public:
 	opencl::library lib;
 	int passedOperations = 0;
 	// get default device and setup context
-	compute::device device = compute::system::devices().at(1);
+	compute::device device = compute::system::default_device();
 	compute::context context(device);
 	compute::command_queue queue(context, device);
 
