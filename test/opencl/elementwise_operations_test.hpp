@@ -63,7 +63,7 @@ class bench_elementwise
   {
 	for (int i = 0; i <v.size(); i++)
 	{
-	  v[i] = std::rand() % (std::rand() % max_value) + 1;
+	  v[i] = (std::rand() %  max_value) + 1;
 	}
   }
 
