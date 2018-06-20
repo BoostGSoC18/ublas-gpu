@@ -43,6 +43,9 @@ template <class T, class F>
   //check all matrices are on same context
   assert(  (a.device() == b.device()) && (a.device() == result.device()) && (a.device()== queue.get_device()) );
 
+  //check dimension of matrices
+  assert(a.size2() == b.size1());
+
   result.fill(0, queue);
 
   cl_event event = NULL;
@@ -184,6 +187,11 @@ template <class T, class F, class A>
 	//check all matrices are on same context
 	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
 
+
+	//check dimension of matrices
+	assert(a.size2() == b.size());
+
+
 	result.fill(0, queue);
 
 	cl_event event = NULL;
@@ -319,6 +327,11 @@ template <class T, class F, class A>
   {
 	//check all matrices are on same context
 	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
+
+
+	//check dimension of matrices
+	assert(a.size() == b.size1());
+
 
 	result.fill(0, queue);
 
