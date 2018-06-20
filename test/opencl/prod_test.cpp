@@ -10,11 +10,26 @@ int main()
 	///testing row major complex float prod
 	bench_prod<std::complex<float>, ublas::basic_row_major<>, 10, 10> b2;
 
+
+	///testing row major double prod
+	bench_prod<double, ublas::basic_row_major<>, 10, 10> b5;
+
+	///testing row major complex float prod
+	bench_prod<std::complex<double>, ublas::basic_row_major<>, 10, 10> b6;
+
+
 	///testing column major flaot prod
 	bench_prod<float, ublas::basic_column_major<>, 10, 10> b3;
 
 	///testing column major complex float prod
 	bench_prod<std::complex<float>, ublas::basic_column_major<>, 10, 10> b4;
+
+	///testing column major double prod
+	bench_prod<double, ublas::basic_column_major<>, 10, 10> b3;
+
+	///testing column major complex double prod
+	bench_prod<std::complex<double>, ublas::basic_column_major<>, 10, 10> b4;
+
 
 	std::cout << "Row major:" << std::endl;
 	b1.run();
