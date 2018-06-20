@@ -457,6 +457,202 @@ template <class T, class L, class A>
   
 
 
+
+
+  /**This function computes an element-wise operation of 2 matrices and stores it at matrix result all 3 matrices are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a matrix A of the element-wise operation that is on device
+  * \param b matrix B of the element-wise operation that is on the device
+  * \param result matrix on device to store the result
+  * \param fun is a boost::compute binary function that is the binary operation that gets executed
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  */
+  template <class T, class L, class binary_operator>
+  void element_wise(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, binary_operator fun, compute::command_queue& queue)
+  {
+	//check all matrices are on same context
+	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
+
+
+	//check that dimensions of matrices are equal
+	assert((a.size1() == b.size1()) && (a.size2() == b.size2()));
+
+	compute::transform(a.begin(),
+	  a.end(),
+	  b.begin(),
+	  result.begin(),
+	  fun,
+	  queue);
+
+	queue.finish();
+  }
+
+
+
+  /**This function computes an element-wise operation of 2 matrices not on device and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  *
+  * \param a matrix A of the element-wise operation that is not on device
+  * \param b matrix B of the element-wise operation that is not on the device
+  * \param result matrix on device to store the operation of the result
+  * \param fun is a boost::compute binary function that is the binary operation that gets executed
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam A storage type that has the data of the matrices
+  */
+  template <class T, class L, class A, class binary_operator>
+  void element_wise(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, binary_operator fun, compute::command_queue &queue)
+  {
+
+	///copy the data from a to aHolder
+	ublas::matrix<T, L, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
+	aHolder.from_host(a, queue);
+
+	///copy the data from b to bHolder
+	ublas::matrix<T, L, opencl::storage> bHolder(b.size1(), b.size2(), queue.get_context());
+	bHolder.from_host(b, queue);
+
+	ublas::matrix<T, L, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
+
+	element_wise(aHolder, bHolder, resultHolder, fun, queue); //call the add function that performs sumition
+
+	resultHolder.to_host(result, queue);
+  }
+
+
+  /**This function computation element-wise operation of 2 matrices not on device and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a matrix A of the operation that is not on device (it's on the host)
+  * \param b matrix B of the operation that is not on the device (it's on the host)
+  * \param fun is a boost::compute binary function that is the binary operation that gets executed
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam A storage type that has the data of the matrices
+  */
+  template <class T, class L, class A, class binary_operator>
+  ublas::matrix<T, L, A> element_wise(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, binary_operator fun, compute::command_queue &queue)
+  {
+	ublas::matrix<T, L, A> result(a.size1(), b.size2());
+	element_wise(a, b, result, fun, queue);
+	return result;
+  }
+
+
+
+  /**This function computes an element-wise operation of 2 vectors and stores it at vector result all 3 vectors are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a vector A of the element-wise operation that is on device
+  * \param b vector B of the element-wise operation that is on the device
+  * \param result vector on device to store the result
+  * \param fun is a boost::compute binary function that is the binary operation that gets executed
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  * \tparam A storage type that has the data of the matrices
+  */
+  template <class T, class binary_operator>
+  void element_wise(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, binary_operator fun, compute::command_queue& queue)
+  {
+	//check all vectors are on same device
+	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
+
+
+	//check that dimensions of matrices are equal
+	assert(a.size() == b.size());
+
+	compute::transform(a.begin(),
+	  a.end(),
+	  b.begin(),
+	  result.begin(),
+	  fun,
+	  queue);
+
+	queue.finish();
+  }
+
+
+  /**This function computes an element-wise operation of 2 vectors not on device  and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  *
+  * \param a vector A of the operation that is not on device
+  * \param b vector B of the operation that is not on the device
+  * \param result vector on device to store the result
+  * \param fun is a boost::compute binary function that is the binary operation that gets executed
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  * \tparam A storage type that has the data of the vectors
+  */
+  template <class T, class A, class binary_operator>
+  void element_wise(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, binary_operator fun, compute::command_queue &queue)
+  {
+
+	///copy the data from a to aHolder
+	ublas::vector<T, opencl::storage> aHolder(a.size(), queue.get_context());
+	aHolder.from_host(a, queue);
+
+	///copy the data from b to bHolder
+	ublas::vector<T, opencl::storage> bHolder(b.size(), queue.get_context());
+	bHolder.from_host(b, queue);
+
+	ublas::vector<T, opencl::storage> resultHolder(a.size(), queue.get_context());
+
+	element_wise(aHolder, bHolder, resultHolder, fun, queue); //call the add function that performs sumition
+
+	resultHolder.to_host(result, queue);
+
+
+  }
+
+  /**This function computes an element wise operation of 2 vectors not on device and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a vector A of the operation that is not on device (it's on the host)
+  * \param b vector B of the operation that is not on the device (it's on the host)
+  * \param fun is a boost::compute binary function that is the binary operation that gets executed
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  * \tparam A storage type that has the data of the vectors
+  */
+  template <class T, class A, class binary_operator>
+  ublas::vector<T, A> element_wise(ublas::vector<T, A>& a, ublas::vector<T, A>& b, binary_operator fun, compute::command_queue &queue)
+  {
+	ublas::vector<T, A> result(a.size());
+	element_wise(a, b, result, fun, queue);
+	return result;
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
   /**This function computes the summition (element-wise) of 2 matrices (a+b) and stores it at matrix result all 3 matrices are on device
   *
   * a and b are originally on device (on the same device) and the result is left on the same device.
@@ -472,21 +668,7 @@ template <class T, class L, class A>
   template <class T, class L>
   void add(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
   {
-	//check all matrices are on same context
-	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
-
-
-	//check that dimensions of matrices are equal
-	assert( (a.size1() == b.size1()) && (a.size2() == b.size2()) );
-
-	compute::transform(a.begin(),
-	  a.end(),
-	  b.begin(),
-	  result.begin(),
-	  compute::plus<T>(),
-	  queue);
-
-	queue.finish();
+	element_wise(a, b, result, compute::plus<T>(), queue);
   }
 
 
@@ -506,22 +688,7 @@ template <class T, class L, class A>
   template <class T, class L, class A>
   void add(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
   {
-
-	///copy the data from a to aHolder
-	ublas::matrix<T, L, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
-	aHolder.from_host(a, queue);
-
-	///copy the data from b to bHolder
-	ublas::matrix<T, L, opencl::storage> bHolder(b.size1(), b.size2(), queue.get_context());
-	bHolder.from_host(b, queue);
-
-	ublas::matrix<T, L, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
-
-	add(aHolder, bHolder, resultHolder, queue); //call the add function that performs sumition
-
-	resultHolder.to_host(result, queue);
-
-
+	element_wise(a, b, result, compute::plus<T>(), queue);
   }
 
 
@@ -541,9 +708,7 @@ template <class T, class L, class A>
   template <class T, class L, class A>
   ublas::matrix<T, L, A> add(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
   {
-	ublas::matrix<T, L, A> result(a.size1(), b.size2());
-	add(a, b, result, queue);
-	return result;
+	return element_wise(a, b, compute::plus<T>(), queue);
   }
 
 
@@ -566,21 +731,7 @@ template <class T, class L, class A>
   template <class T>
   void add(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
   {
-	//check all vectors are on same device
-	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
-
-
-	//check that dimensions of matrices are equal
-	assert( a.size() == b.size() );
-
-	compute::transform(a.begin(),
-	  a.end(),
-	  b.begin(),
-	  result.begin(),
-	  compute::plus<T>(),
-	  queue);
-
-	queue.finish();
+	element_wise(a, b, result, compute::plus<T>(), queue);
   }
 
 
@@ -593,28 +744,13 @@ template <class T, class L, class A>
   * \param result vector on device to store the summition of the result of (A+B)
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
-  * \tparam T datatype of the matrices
+  * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
   */
   template <class T, class A>
   void add(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
   {
-
-	///copy the data from a to aHolder
-	ublas::vector<T, opencl::storage> aHolder(a.size(), queue.get_context());
-	aHolder.from_host(a, queue);
-
-	///copy the data from b to bHolder
-	ublas::vector<T, opencl::storage> bHolder(b.size(), queue.get_context());
-	bHolder.from_host(b, queue);
-
-	ublas::vector<T, opencl::storage> resultHolder(a.size(), queue.get_context());
-
-	add(aHolder, bHolder, resultHolder, queue); //call the add function that performs sumition
-
-	resultHolder.to_host(result, queue);
-
-
+	element_wise(a, b, result, compute::plus<T>(), queue);
   }
 
 
@@ -629,14 +765,269 @@ template <class T, class L, class A>
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
   */
-
   template <class T, class A>
   ublas::vector<T, A> add(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
   {
-	ublas::vector<T, A> result(a.size());
-	add(a, b, result, queue);
-	return result;
+	return element_wise(a, b, compute::plus<T>(), queue);
   }
+
+
+
+
+  //matrix-matrix subtraction
+
+
+
+  /**This function computes the subtraction (element-wise) of 2 matrices (a-b) and stores it at matrix result all 3 matrices are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a matrix A of the subtraction (A-B) that is on device
+  * \param b matrix B of the subtraction (A-B) that is on the device
+  * \param result matrix on device to store the result of (A-B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  */
+  template <class T, class L>
+  void sub(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  {
+	element_wise(a, b, compute::minus<T>(), result, queue);
+  }
+
+
+  /**This function computes the subtraction (element-wise) of 2 matrices not on device (a-b) and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  *
+  * \param a matrix A of the subtraction (A-B) that is not on device
+  * \param b matrix B of the subtraction (A-B) that is not on the device
+  * \param result matrix on device to store the subtraction of the result of (A-B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam A storage type that has the data of the matrices
+  */
+  template <class T, class L, class A>
+  void sub(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  {
+	element_wise(a, b, result, compute::minus<T>(), queue);
+  }
+
+
+  /**This function computes the subtraction (element-wise) of 2 matrices not on device (a-b) and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a matrix A of the subtraction (A-B) that is not on device (it's on the host)
+  * \param b matrix B of the subtraction (A-B) that is not on the device (it's on the host)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam A storage type that has the data of the matrices
+  */
+
+  template <class T, class L, class A>
+  ublas::matrix<T, L, A> sub(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  {
+	return element_wise(a, b, compute::minus<T>(), queue);
+  }
+
+
+
+
+  //vector-vector subtraction 
+
+
+  /**This function computes the subtraction (element-wise) of 2 vectors (a-b) and stores it at matrix result all 3 vectors are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a vector A of the subtraction (A-B) that is on device
+  * \param b vector B of the subtraction (A-B) that is on the device
+  * \param result vector on device to store the result of (A-B)
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  */
+  template <class T>
+  void sub(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  {
+	element_wise(a, b, result, compute::minus<T>(), queue);
+  }
+
+
+  /**This function computes the subtraction (element-wise) of 2 vectors not on device (a-b) and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  *
+  * \param a vector A of the subtraction (A-B) that is not on device
+  * \param b vector B of the subtraction (A-B) that is not on the device
+  * \param result vector on device to store the subtraction of the result of (A-B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  * \tparam A storage type that has the data of the vectors
+  */
+  template <class T, class A>
+  void sub(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  {
+	element_wise(a, b, result, compute::minus<T>(), queue);
+  }
+
+
+  /**This function computes the subtraction (element-wise) of 2 vectors not on device (a-b) and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a vector A of the subtraction (A-B) that is not on device (it's on the host)
+  * \param b vector B of the subtraction (A-B) that is not on the device (it's on the host)
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  * \tparam A storage type that has the data of the vectors
+  */
+
+  template <class T, class A>
+  ublas::vector<T, A> sub(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
+  {
+	return element_wise(a, b, compute::minus<T>(), queue);
+  }
+
+
+
+
+
+
+  //matrix-matrix multiplication (element-wise)
+
+
+
+  /**This function computes the multiplication (element-wise) of 2 matrices (a*b) and stores it at matrix result all 3 matrices are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a matrix A of the  multiplication (element-wise) (A*B) that is on device
+  * \param b matrix B of the  multiplication (element-wise) (A*B) that is on the device
+  * \param result matrix on device to store the result of (A*B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  */
+  template <class T, class L>
+  void mul(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  {
+	element_wise(a, b, result, compute::multiplies<T>(), queue);
+  }
+
+
+  /**This function computes the multiplication (element-wise) of 2 matrices not on device (a*b) and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  *
+  * \param a matrix A of the  multiplication (element-wise) (A*B) that is not on device
+  * \param b matrix B of the  multiplication (element-wise) (A*B) that is not on the device
+  * \param result matrix on device to store the  multiplication (element-wise) of the result of (A*B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam A storage type that has the data of the matrices
+  */
+  template <class T, class L, class A>
+  void mul(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  {
+	element_wise(a, b, result, compute::multiplies<T>(), queue);
+  }
+
+
+  /**This function computes the  multiplication (element-wise) of 2 matrices not on device (a*b) and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a matrix A of the  multiplication (element-wise) (A*B) that is not on device (it's on the host)
+  * \param b matrix B of the  multiplication (element-wise) (A*B) that is not on the device (it's on the host)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam A storage type that has the data of the matrices
+  */
+
+  template <class T, class L, class A>
+  ublas::matrix<T, L, A> mul(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  {
+	return element_wise(a, b, compute::multiplies<T>(), queue);
+  }
+
+
+
+  //vector-vector  multiplication (element-wise) 
+
+
+  /**This function computes the  multiplication (element-wise) of 2 vectors (a*b) and stores it at matrix result all 3 vectors are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a vector A of the  multiplication (element-wise) (A*B) that is on device
+  * \param b vector B of the  multiplication (element-wise) (A*B) that is on the device
+  * \param result vector on device to store the result of (A*B)
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  */
+  template <class T>
+  void mul(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  {
+	element_wise(a, b, result, compute::multiplies<T>(), queue);
+  }
+
+
+  /**This function computes the  multiplication (element-wise) of 2 vectors not on device (a*b) and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  *
+  * \param a vector A of the  multiplication (element-wise) (A*B) that is not on device
+  * \param b vector B of the  multiplication (element-wise) (A*B) that is not on the device
+  * \param result vector on device to store the  multiplication (element-wise) of the result of (A*B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  * \tparam A storage type that has the data of the vectors
+  */
+  template <class T, class A>
+  void mul(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  {
+	element_wise(a, b, result, compute::multiplies<T>(), queue);
+  }
+
+
+  /**This function computes the  multiplication (element-wise) of 2 vectors not on device (a*b) and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a vector A of the  multiplication (element-wise) (A*B) that is not on device (it's on the host)
+  * \param b vector B of the  multiplication (element-wise) (A*B) that is not on the device (it's on the host)
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  * \tparam A storage type that has the data of the vectors
+  */
+
+  template <class T, class A>
+  ublas::vector<T, A> mul(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
+  {
+	return element_wise(a, b, compute::multiplies<T>(), queue);
+  }
+
+
+
+
+
 
 
 
