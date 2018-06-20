@@ -264,4 +264,11 @@ test-suite numeric/uBLAS
       : # requirements
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
       ]
+
+      [ run opencl/elementwise_operations_test.cpp
+      : # args
+      : # input files
+      : # requirements
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+      ]
     ;

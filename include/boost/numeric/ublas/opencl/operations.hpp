@@ -482,6 +482,8 @@ template <class T, class L, class A>
 	//check that dimensions of matrices are equal
 	assert((a.size1() == b.size1()) && (a.size2() == b.size2()));
 
+	result.fill((T)0, queue);
+
 	compute::transform(a.begin(),
 	  a.end(),
 	  b.begin(),
@@ -573,6 +575,8 @@ template <class T, class L, class A>
 
 	//check that dimensions of matrices are equal
 	assert(a.size() == b.size());
+
+	result.fill((T)0, queue);
 
 	compute::transform(a.begin(),
 	  a.end(),
@@ -1024,6 +1028,128 @@ template <class T, class L, class A>
 	return element_wise(a, b, compute::multiplies<T>(), queue);
   }
 
+
+
+  //matrix-matrix division (element-wise)
+
+
+
+  /**This function computes the division (element-wise) of 2 matrices (a/b) and stores it at matrix result all 3 matrices are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a matrix A of the  division (element-wise) (A/B) that is on device
+  * \param b matrix B of the  division (element-wise) (A/B) that is on the device
+  * \param result matrix on device to store the result of (A/B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  */
+  template <class T, class L>
+  void div(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  {
+	element_wise(a, b, result, compute::divides<T>(), queue);
+  }
+
+
+  /**This function computes the division (element-wise) of 2 matrices not on device (a/b) and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  *
+  * \param a matrix A of the  division (element-wise) (A/B) that is not on device
+  * \param b matrix B of the  division (element-wise) (A/B) that is not on the device
+  * \param result matrix on device to store the  division (element-wise) of the result of (A*B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam A storage type that has the data of the matrices
+  */
+  template <class T, class L, class A>
+  void div(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  {
+	element_wise(a, b, result, compute::divides<T>(), queue);
+  }
+
+
+  /**This function computes the  division (element-wise) of 2 matrices not on device (a/b) and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a matrix A of the  division (element-wise) (A/B) that is not on device (it's on the host)
+  * \param b matrix B of the  division (element-wise) (A/B) that is not on the device (it's on the host)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the matrices
+  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam A storage type that has the data of the matrices
+  */
+
+  template <class T, class L, class A>
+  ublas::matrix<T, L, A> div(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  {
+	return element_wise(a, b, compute::divides<T>(), queue);
+  }
+
+
+
+  //vector-vector  division (element-wise) 
+
+
+  /**This function computes the  division (element-wise) of 2 vectors (a/b) and stores it at matrix result all 3 vectors are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a vector A of the  division (element-wise) (A/B) that is on device
+  * \param b vector B of the  division (element-wise) (A/B) that is on the device
+  * \param result vector on device to store the result of (A/B)
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \tparam T datatype of the vectors
+  */
+  template <class T>
+  void div(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  {
+	element_wise(a, b, result, compute::divides<T>(), queue);
+  }
+
+
+  /**This function computes the  division (element-wise) of 2 vectors not on device (a/b) and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  *
+  * \param a vector A of the  division (element-wise) (A/B) that is not on device
+  * \param b vector B of the  division (element-wise) (A/B) that is not on the device
+  * \param result vector on device to store the  multiplication (element-wise) of the result of (A/B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  * \tparam A storage type that has the data of the vectors
+  */
+  template <class T, class A>
+  void div(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  {
+	element_wise(a, b, result, compute::divides<T>(), queue);
+  }
+
+
+  /**This function computes the  division (element-wise) of 2 vectors not on device (a/b) and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a vector A of the  division (element-wise) (A/B) that is not on device (it's on the host)
+  * \param b vector B of the  division (element-wise) (A/B) that is not on the device (it's on the host)
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  *
+  * \tparam T datatype of the vectors
+  * \tparam A storage type that has the data of the vectors
+  */
+
+  template <class T, class A>
+  ublas::vector<T, A> div(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
+  {
+	return element_wise(a, b, compute::divides<T>(), queue);
+  }
 
 
 
