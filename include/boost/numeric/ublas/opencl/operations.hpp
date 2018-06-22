@@ -450,6 +450,57 @@ template <class T, class L, class A>
 	return result;
   }
 
+  //inner product
+
+  /** This function computes the inner product of two vector that are already on opencl device
+  *
+  * \param a first vector of inner product
+  * \param b second vector of inner product
+  * \param init initial value to start accumlating on
+  * \param queue the command queue which it's device has the 2 vectors and which will execute the operation
+  *
+  *
+  * \tparam T datatype
+  * \tparam A storage type that has the data
+  */
+  template<class T>
+  T inner_prod(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, T init, compute::command_queue& queue)
+  {
+	//check that both vectors are on the same device
+	assert((a.device() == b.device()) && (a.device() == queue.get_device()));
+
+	//check both vectors are the same size
+	assert(a.size() == b.size());
+
+	return compute::inner_product(a.begin(), a.end(), b.begin(), init, queue);
+  }
+
+
+  /** This function computes the inner product of two vector that are on host
+  *
+  * \param a first vector of inner product
+  * \param b second vector of inner product
+  * \param init initial value to start accumlating on
+  * \param queue the command queue which it's device has the 2 vectors and which will execute the operation
+  *
+  *
+  * \tparam T datatype
+  * \tparam A storage type that has the data
+  */
+  template<class T, class A>
+  T inner_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, T init, compute::command_queue& queue)
+  {
+	ublas::vector<T, opencl::storage> aHolder(a.size() , queue.get_context());
+	aHolder.from_host(a, queue);
+
+	ublas::vector<T, opencl::storage> bHolder(b.size(), queue.get_context());
+	bHolder.from_host(b, queue);
+
+	return inner_prod(aHolder, bHolder, init, queue);
+  }
+
+
+
 
   //Elements-wise operations
   
