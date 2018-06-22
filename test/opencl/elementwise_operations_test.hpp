@@ -129,23 +129,23 @@ public:
 	  init_vector(vb, 200);
 
 	  result_m_add = a + b;
-	  result_m_add_cl = opencl::add(a, b, queue);
+	  result_m_add_cl = opencl::element_add(a, b, queue);
 
 	  result_m_sub = a - b;
-	  result_m_sub_cl = opencl::sub(a, b, queue);
+	  result_m_sub_cl = opencl::element_sub(a, b, queue);
 
 	  result_m_mul = ublas::element_prod(a, b);
-	  result_m_mul_cl = opencl::mul(a, b, queue);
+	  result_m_mul_cl = opencl::element_prod(a, b, queue);
 
 
 	  result_v_add = va + vb;
-	  result_v_add_cl = opencl::add(va, vb, queue);
+	  result_v_add_cl = opencl::element_add(va, vb, queue);
 
 	  result_v_sub = va - vb;
-	  result_v_sub_cl = opencl::sub(va, vb, queue);
+	  result_v_sub_cl = opencl::element_sub(va, vb, queue);
 
 	  result_v_mul = ublas::element_prod(va, vb);
-	  result_v_mul_cl = opencl::mul(va, vb, queue);
+	  result_v_mul_cl = opencl::element_prod(va, vb, queue);
 
 
 

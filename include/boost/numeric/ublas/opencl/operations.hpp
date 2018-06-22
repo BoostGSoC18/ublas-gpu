@@ -482,7 +482,7 @@ template <class T, class L, class A>
 	//check that dimensions of matrices are equal
 	assert((a.size1() == b.size1()) && (a.size2() == b.size2()));
 
-	result.fill((T)0, queue);
+	result.fill(0, queue);
 
 	compute::transform(a.begin(),
 	  a.end(),
@@ -576,7 +576,7 @@ template <class T, class L, class A>
 	//check that dimensions of matrices are equal
 	assert(a.size() == b.size());
 
-	result.fill((T)0, queue);
+	result.fill(0, queue);
 
 	compute::transform(a.begin(),
 	  a.end(),
@@ -670,7 +670,7 @@ template <class T, class L, class A>
   * \tparam L layout of the matrices (row_major or column_major)
   */
   template <class T, class L>
-  void add(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  void element_add(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, result, compute::plus<T>(), queue);
   }
@@ -690,7 +690,7 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data of the matrices
   */
   template <class T, class L, class A>
-  void add(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  void element_add(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::plus<T>(), queue);
   }
@@ -710,7 +710,7 @@ template <class T, class L, class A>
   */
 
   template <class T, class L, class A>
-  ublas::matrix<T, L, A> add(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  ublas::matrix<T, L, A> element_add(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::plus<T>(), queue);
   }
@@ -733,7 +733,7 @@ template <class T, class L, class A>
   * \tparam T datatype of the vectors
   */
   template <class T>
-  void add(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  void element_add(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, result, compute::plus<T>(), queue);
   }
@@ -752,7 +752,7 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data of the vectors
   */
   template <class T, class A>
-  void add(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  void element_add(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::plus<T>(), queue);
   }
@@ -770,7 +770,7 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data of the vectors
   */
   template <class T, class A>
-  ublas::vector<T, A> add(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
+  ublas::vector<T, A> element_add(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::plus<T>(), queue);
   }
@@ -795,7 +795,7 @@ template <class T, class L, class A>
   * \tparam L layout of the matrices (row_major or column_major)
   */
   template <class T, class L>
-  void sub(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  void element_sub(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, compute::minus<T>(), result, queue);
   }
@@ -815,7 +815,7 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data of the matrices
   */
   template <class T, class L, class A>
-  void sub(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  void element_sub(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::minus<T>(), queue);
   }
@@ -835,7 +835,7 @@ template <class T, class L, class A>
   */
 
   template <class T, class L, class A>
-  ublas::matrix<T, L, A> sub(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  ublas::matrix<T, L, A> element_sub(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::minus<T>(), queue);
   }
@@ -858,7 +858,7 @@ template <class T, class L, class A>
   * \tparam T datatype of the vectors
   */
   template <class T>
-  void sub(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  void element_sub(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, result, compute::minus<T>(), queue);
   }
@@ -877,7 +877,7 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data of the vectors
   */
   template <class T, class A>
-  void sub(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  void element_sub(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::minus<T>(), queue);
   }
@@ -896,7 +896,7 @@ template <class T, class L, class A>
   */
 
   template <class T, class A>
-  ublas::vector<T, A> sub(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
+  ublas::vector<T, A> element_sub(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::minus<T>(), queue);
   }
@@ -923,7 +923,7 @@ template <class T, class L, class A>
   * \tparam L layout of the matrices (row_major or column_major)
   */
   template <class T, class L>
-  void mul(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  void element_prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, result, compute::multiplies<T>(), queue);
   }
@@ -943,7 +943,7 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data of the matrices
   */
   template <class T, class L, class A>
-  void mul(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  void element_prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::multiplies<T>(), queue);
   }
@@ -963,7 +963,7 @@ template <class T, class L, class A>
   */
 
   template <class T, class L, class A>
-  ublas::matrix<T, L, A> mul(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  ublas::matrix<T, L, A> element_prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::multiplies<T>(), queue);
   }
@@ -985,7 +985,7 @@ template <class T, class L, class A>
   * \tparam T datatype of the vectors
   */
   template <class T>
-  void mul(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  void element_prod(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, result, compute::multiplies<T>(), queue);
   }
@@ -1004,7 +1004,7 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data of the vectors
   */
   template <class T, class A>
-  void mul(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  void element_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::multiplies<T>(), queue);
   }
@@ -1023,7 +1023,7 @@ template <class T, class L, class A>
   */
 
   template <class T, class A>
-  ublas::vector<T, A> mul(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
+  ublas::vector<T, A> element_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::multiplies<T>(), queue);
   }
@@ -1047,7 +1047,7 @@ template <class T, class L, class A>
   * \tparam L layout of the matrices (row_major or column_major)
   */
   template <class T, class L>
-  void div(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  void element_div(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, result, compute::divides<T>(), queue);
   }
@@ -1067,7 +1067,7 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data of the matrices
   */
   template <class T, class L, class A>
-  void div(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  void element_div(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::divides<T>(), queue);
   }
@@ -1087,7 +1087,7 @@ template <class T, class L, class A>
   */
 
   template <class T, class L, class A>
-  ublas::matrix<T, L, A> div(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  ublas::matrix<T, L, A> element_div(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::divides<T>(), queue);
   }
@@ -1108,7 +1108,7 @@ template <class T, class L, class A>
   * \tparam T datatype of the vectors
   */
   template <class T>
-  void div(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  void element_div(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, result, compute::divides<T>(), queue);
   }
@@ -1127,7 +1127,7 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data of the vectors
   */
   template <class T, class A>
-  void div(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  void element_div(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::divides<T>(), queue);
   }
@@ -1146,7 +1146,7 @@ template <class T, class L, class A>
   */
 
   template <class T, class A>
-  ublas::vector<T, A> div(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
+  ublas::vector<T, A> element_div(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::divides<T>(), queue);
   }
