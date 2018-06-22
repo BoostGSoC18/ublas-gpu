@@ -1,82 +1,18 @@
 #ifndef ELEMENT_OPENCL_HH
 #define ELEMENT_OPENCL_HH
-#include <stdio.h>
-
-#define ENABLE_OPENCL
-#include <boost/numeric/ublas/matrix.hpp>
-#include <time.h>
-#include <math.h>
-
-
-namespace ublas = boost::numeric::ublas;
-namespace opencl = boost::numeric::ublas::opencl;
-namespace compute = boost::compute;
+#include "test_opencl.hpp"
 
 template <class T, class F, int number_of_tests, int max_dimension>
 class bench_elementwise
 {
-
-  bool compare(ublas::matrix<T, F>& a, ublas::matrix<T, F>& b)
-  {
-	if ((a.size1() != b.size1()) || (a.size2() != b.size2()))
-	  return false;
-
-	for (int i = 0; i<a.size1(); i++)
-	  for (int j = 0; j<a.size2(); j++)
-		if (a(i, j) != b(i, j))
-		{
-		  return false;
-		}
-	return true;
-
-  }
-
-
-  bool compare(ublas::vector<T>& a, ublas::vector<T>& b)
-  {
-	if (a.size() != b.size())
-	  return false;
-
-	for (int i = 0; i<a.size(); i++)
-	  if ((a[i] != b[i]))
-	  {
-		return false;
-	  }
-	return true;
-
-  }
-
-
-
-  void init_matrix(ublas::matrix<T, F>& m, int max_value)
-  {
-	for (int i = 0; i < m.size1(); i++)
-	{
-	  for (int j = 0; j<m.size2(); j++)
-		m(i, j) = (std::rand() % max_value) + 1;
-
-	}
-  }
-
-
-  void init_vector(ublas::vector<T>& v, int max_value)
-  {
-	for (int i = 0; i <v.size(); i++)
-	{
-	  v[i] = (std::rand() %  max_value) + 1;
-	}
-  }
-
-
 public:
-
-
+  typedef test_opencl<T, F> test;
   void run()
   {
 	opencl::library lib;
 	int passedOperations = 0;
 	// get default device and setup context
-	compute::device device = compute::system::default_device();
+	compute::device device = compute::system::devices().default_device();
 	compute::context context(device);
 	compute::command_queue queue(context, device);
 
@@ -109,8 +45,6 @@ public:
 	ublas::vector<T> result_v_sub_cl;
 	ublas::vector<T> result_v_mul_cl;
 
-	compare(result_m_add, result_m_add_cl);
-
 
 	for (int i = 0; i<number_of_tests; i++)
 	{
@@ -123,10 +57,10 @@ public:
 	  vb.resize(rows);
 
 
-	  init_matrix(a, 200);
-	  init_matrix(b, 200);
-	  init_vector(va, 200);
-	  init_vector(vb, 200);
+	  test::init_matrix(a, 200);
+	  test::init_matrix(b, 200);
+	  test::init_vector(va, 200);
+	  test::init_vector(vb, 200);
 
 	  result_m_add = a + b;
 	  result_m_add_cl = opencl::element_add(a, b, queue);
@@ -152,12 +86,12 @@ public:
 
 
 
-	  if ((!compare(result_m_add, result_m_add_cl)) ||
-		(!compare(result_m_sub, result_m_sub_cl)) ||
-		(!compare(result_m_mul, result_m_mul_cl)) ||
-		(!compare(result_v_add, result_v_add_cl)) ||
-		(!compare(result_v_sub, result_v_sub_cl)) ||
-		(!compare(result_v_mul, result_v_mul_cl))
+	  if ((!test::compare(result_m_add, result_m_add_cl)) ||
+		(!test::compare(result_m_sub, result_m_sub_cl)) ||
+		(!test::compare(result_m_mul, result_m_mul_cl)) ||
+		(!test::compare(result_v_add, result_v_add_cl)) ||
+		(!test::compare(result_v_sub, result_v_sub_cl)) ||
+		(!test::compare(result_v_mul, result_v_mul_cl))
 		)
 	  {
 		std::cout << "Error in calculations" << std::endl;
