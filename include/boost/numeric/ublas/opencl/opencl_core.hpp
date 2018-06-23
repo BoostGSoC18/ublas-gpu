@@ -203,6 +203,19 @@ public:
   }
 
 
+  ///swaps content between two matrices on opencl device
+  void swap(ublas::matrix<T, L, opencl::storage>& m, compute::command_queue & queue)
+  {
+	assert( (this->size1() == m.size1()) && (this->size2() == m.size2()) );
+
+	assert((this->device() == queue.get_device()) && (m.device() == queue.get_device()));
+
+	compute::swap_ranges(this->begin(), this->end(), m.begin(), queue);
+
+	queue.finish();
+  }
+
+
 private:
   size_type size1_;
   size_type size2_;
@@ -304,6 +317,19 @@ public:
 	
 	queue.finish();
   }
+
+  ///swaps content between two vectors on opencl device
+  void swap(ublas::vector<T, opencl::storage>& v, compute::command_queue & queue)
+  {
+	assert(this->size() == v.size());
+
+	assert( (this->device() == queue.get_device()) && (v.device()==queue.get_device()) );
+
+	compute::swap_ranges(this->begin(), this->end(), v.begin(), queue);
+
+	queue.finish();
+  }
+
 
 private:
   compute::device device_;
