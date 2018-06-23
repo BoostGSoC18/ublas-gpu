@@ -26,8 +26,6 @@ int main()
   b3.run();
   b4.run();
 
-
-  system("pause");
   return 0;
 
 }
