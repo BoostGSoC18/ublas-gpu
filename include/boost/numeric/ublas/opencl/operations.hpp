@@ -501,6 +501,150 @@ template <class T, class L, class A>
 
 
 
+  //Outer product
+
+  /**This function computes the outer product of two vectors (a x b) and stores it at vector result all 3 are on device
+  *
+  * a and b are originally on device (on the same device) and the result is left on the same device.
+  *
+  * \param a vector A of the outer product (A x B) that is on device
+  * \param b vector B of the outer product (A x B) that is on the device
+  * \param result vector on device to store the result of the outer product
+  * \param queue has the queue of the device which has the result vector and which will do the computation
+  *
+  * \tparam T datatype
+  * \tparam L layout of the matrix (row_major or column_major)
+  */
+  template <class T, class L>
+  void outer_prod(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue & queue)
+  {
+	//check all vectors are on same context
+	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
+
+
+
+	result.fill(0, queue);
+
+	cl_event event = NULL;
+
+
+	clblasOrder Order = std::is_same<L, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
+	int lda = Order == clblasRowMajor ? 1 : a.size();
+	int ldb = Order == clblasRowMajor ? b.size() : 1;
+	int ldc = Order == clblasRowMajor ? b.size() : a.size();
+
+
+
+
+
+	if (std::is_same<T, float>::value)
+	  //Call clBLAS extended function. Perform gemm for float
+	  clblasSgemm(Order, clblasNoTrans, clblasNoTrans,
+		a.size(), b.size(), 1,
+		1, (cl_mem)a.begin().get_buffer().get(), 0, lda,
+		(cl_mem)b.begin().get_buffer().get(), 0, ldb, 1,
+		(cl_mem)result.begin().get_buffer().get(), 0, ldc,
+		1, &(queue.get()), 0, NULL, &event);
+
+
+	else if (std::is_same<T, double>::value)
+	  //Call clBLAS extended function. Perform gemm for double
+	  clblasDgemm(Order, clblasNoTrans, clblasNoTrans,
+		a.size(), b.size(), 1,
+		1, (cl_mem)a.begin().get_buffer().get(), 0, lda,
+		(cl_mem)b.begin().get_buffer().get(), 0, ldb, 1,
+		(cl_mem)result.begin().get_buffer().get(), 0, ldc,
+		1, &(queue.get()), 0, NULL, &event);
+
+	else if (std::is_same<T, std::complex<float>>::value)
+	  //Call clBLAS extended function. Perform gemm for complext float
+	  clblasCgemm(Order, clblasNoTrans, clblasNoTrans,
+		a.size(), b.size(), 1,
+		ONE_FLOAT_COMPLEX, (cl_mem)a.begin().get_buffer().get(), 0, lda,
+		(cl_mem)b.begin().get_buffer().get(), 0, ldb, ONE_FLOAT_COMPLEX,
+		(cl_mem)result.begin().get_buffer().get(), 0, ldc,
+		1, &(queue.get()), 0, NULL, &event);
+
+	else if (std::is_same<T, std::complex<double>>::value)
+	  //Call clBLAS extended function. Perform gemm for complex double
+	  clblasZgemm(Order, clblasNoTrans, clblasNoTrans,
+		a.size(), b.size(), 1,
+		ONE_DOUBLE_COMPLEX, (cl_mem)a.begin().get_buffer().get(), 0, lda,
+		(cl_mem)b.begin().get_buffer().get(), 0, ldb, ONE_DOUBLE_COMPLEX,
+		(cl_mem)result.begin().get_buffer().get(), 0, ldc,
+		1, &(queue.get()), 0, NULL, &event);
+
+
+
+	//Wait for calculations to be finished.
+	clWaitForEvents(1, &event);
+
+
+
+  }
+
+
+
+  /**This function computes the outer product of two vectors on host (a x b) and stores it at vector result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  *
+  * \param a vector A of the product (A x B) that is not on device
+  * \param b vector B of the product (A x B) that is not on the device
+  * \param result matrix on device to store the result of the outer product of (A x B)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype
+  * \tparam L layout of the matrix (row_major or column_major)
+  * \tparam A storage type that has the data
+  */
+  template <class T, class L, class A>
+  void outer_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  {
+
+	///copy the data from a to aHolder
+	ublas::vector<T, opencl::storage> aHolder(a.size(), queue.get_context());
+	aHolder.from_host(a, queue);
+
+	///copy the data from b to bHolder
+	ublas::vector<T, opencl::storage> bHolder(b.size(), queue.get_context());
+	bHolder.from_host(b, queue);
+
+	ublas::matrix<T, L, opencl::storage> resultHolder(a.size(), b.size(), queue.get_context());
+
+	outer_prod(aHolder, bHolder, resultHolder, queue); //call the prod function that multiplies 
+
+	resultHolder.to_host(result, queue);
+
+
+  }
+
+
+  /**This function computes the outer product of two vectors not on device (a x b) and stores it at matrix result which is also not on device
+  *
+  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  *
+  * \param a vector A of the product (A x B) that is not on device (it's on the host)
+  * \param b vector B of the product (A x B) that is not on the device (it's on the host)
+  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  *
+  * \tparam T datatype
+  * \tparam L layout of the matrix (row_major or column_major)
+  * \tparam A storage type that has the data
+  */
+
+  template <class T,class L = ublas::basic_row_major<>, class A>
+  ublas::matrix<T, L, A> outer_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue )
+  {
+	ublas::matrix<T, L, A> result(a.size(), b.size());
+	outer_prod(a, b, result, queue);
+	return result;
+  }
+
+
+
+
+
 
   //Elements-wise operations
   
