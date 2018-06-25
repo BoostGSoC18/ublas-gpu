@@ -118,6 +118,15 @@ public:
 	q.finish();
   }
 
+  /**matrix constructor that copies a matrix on host to device of the queue
+  * \param m is the matrix to be copied to device
+  * \param queue is the command queue which its device will execute the copying and will have the new matrix
+  */
+  template<class A>
+  matrix(matrix<T, L, A>& m, compute::command_queue& queue) : matrix(m.size1(), m.size2(), queue.get_context())
+  {
+	this->from_host(m, queue);
+  }
 
 
   // Accessors
@@ -254,6 +263,16 @@ public:
   vector(size_type size,T value, compute::command_queue queue) : compute::vector<T>(size,value,  queue) {
 	queue.finish();
 	device_ = queue.get_device();
+  }
+
+  /**vector constructor that copies a vector on host to device of the queue
+  * \param v is the vector to be copied to device
+  * \param queue is the command queue which its device will execute the copying and will have the new vector
+  */
+  template<class A>
+  vector(vector<T, A>& v, compute::command_queue& queue) : vector(v.size(), queue.get_context())
+  {
+	this->from_host(v, queue);
   }
 
 
