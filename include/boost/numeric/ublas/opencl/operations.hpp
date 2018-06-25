@@ -9,6 +9,7 @@
 
 /// Include the clBLAS header. It includes the appropriate OpenCL headers
 #include <clBLAS.h>
+#include <type_traits>
 
 namespace boost {
 namespace numeric {
@@ -38,8 +39,15 @@ namespace ublas = boost::numeric::ublas;
 * \tparam L layout of the matrices (row_major or column_major)
 */
 template <class T, class L>
-  void prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result , compute::command_queue & queue)
+
+typename std::enable_if<std::is_same<T, float>::value |
+  std::is_same<T, double>::value |
+  std::is_same<T, std::complex<float>>::value |
+  std::is_same<T, std::complex<double>>::value, 
+  void>::type
+prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result , compute::command_queue & queue)
 {
+
   //check all matrices are on same context
   assert(  (a.device() == b.device()) && (a.device() == result.device()) && (a.device()== queue.get_device()) );
 
@@ -121,16 +129,19 @@ template <class T, class L>
 * \tparam A storage type that has the data of the matrices
 */
 template <class T, class L, class A>
-  void prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+typename std::enable_if<std::is_same<T, float>::value |
+  std::is_same<T, double>::value |
+  std::is_same<T, std::complex<float>>::value |
+  std::is_same<T, std::complex<double>>::value,
+  void>::type
+  prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
 {
 
   ///copy the data from a to aHolder
-  ublas::matrix<T, L, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
-  aHolder.from_host(a,queue);
+  ublas::matrix<T, L, opencl::storage> aHolder(a, queue);
 
   ///copy the data from b to bHolder
-  ublas::matrix<T, L, opencl::storage> bHolder(b.size1(), b.size2() ,queue.get_context());
-  bHolder.from_host(b,queue);
+  ublas::matrix<T, L, opencl::storage> bHolder(b, queue);
 
   ublas::matrix<T, L, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
 
@@ -156,7 +167,12 @@ template <class T, class L, class A>
 */
 
 template <class T, class L, class A>
-  ublas::matrix<T, L, A> prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+typename std::enable_if<std::is_same<T, float>::value |
+  std::is_same<T, double>::value |
+  std::is_same<T, std::complex<float>>::value |
+  std::is_same<T, std::complex<double>>::value,
+  ublas::matrix<T,L,A>>::type
+  prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
 {
   ublas::matrix<T, L, A> result(a.size1(), b.size2());
   prod(a, b, result, queue);
@@ -182,7 +198,12 @@ template <class T, class L, class A>
   * \tparam L layout of the matrix (row_major or column_major)
   */
   template <class T, class L>
-  void prod(ublas::matrix<T, L, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue & queue)
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	void>::type
+	prod(ublas::matrix<T, L, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue & queue)
   {
 	//check all matrices are on same context
 	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
@@ -265,16 +286,19 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data of the matrix and the vector
   */
   template <class T, class L, class A>
-  void prod(ublas::matrix<T, L, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	void>::type
+	prod(ublas::matrix<T, L, A>& a, ublas::vector<T, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
   {
 
 	///copy the data from a to aHolder
-	ublas::matrix<T, L, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
-	aHolder.from_host(a, queue);
+	ublas::matrix<T, L, opencl::storage> aHolder(a, queue);
 
 	///copy the data from b to bHolder
-	ublas::vector<T, opencl::storage> bHolder(b.size(), queue.get_context());
-	bHolder.from_host(b, queue);
+	ublas::vector<T, opencl::storage> bHolder(b, queue);
 
 	ublas::vector<T, opencl::storage> resultHolder(a.size1(), queue.get_context());
 
@@ -300,7 +324,12 @@ template <class T, class L, class A>
   */
 
   template <class T, class L, class A>
-  ublas::vector<T, A> prod(ublas::matrix<T, L, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	ublas::vector<T,A>>::type
+	prod(ublas::matrix<T, L, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue)
   {
 	ublas::vector<T, A> result(a.size1());
 	prod(a, b, result, queue);
@@ -323,7 +352,12 @@ template <class T, class L, class A>
   * \tparam L layout of the matrix (row_major or column_major)
   */
   template <class T, class L>
-  void prod(ublas::vector<T, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue & queue)
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	void>::type
+	prod(ublas::vector<T, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::vector<T, opencl::storage>& result, compute::command_queue & queue)
   {
 	//check all matrices are on same context
 	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
@@ -408,16 +442,19 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data
   */
   template <class T, class L, class A>
-  void prod(ublas::vector<T, A>& a, ublas::matrix<T, L, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	void>::type
+	prod(ublas::vector<T, A>& a, ublas::matrix<T, L, A>& b, ublas::vector<T, A>& result, compute::command_queue &queue)
   {
 
 	///copy the data from a to aHolder
-	ublas::vector<T, opencl::storage> aHolder(a.size(), queue.get_context());
-	aHolder.from_host(a, queue);
+	ublas::vector<T, opencl::storage> aHolder(a, queue);
 
 	///copy the data from b to bHolder
-	ublas::matrix<T, L, opencl::storage> bHolder(b.size1(), b.size2(), queue.get_context());
-	bHolder.from_host(b, queue);
+	ublas::matrix<T, L, opencl::storage> bHolder(b, queue);
 
 	ublas::vector<T, opencl::storage> resultHolder(b.size2(), queue.get_context());
 
@@ -443,7 +480,12 @@ template <class T, class L, class A>
   */
 
   template <class T, class L, class A>
-  ublas::vector<T, A> prod(ublas::vector<T, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	ublas::vector<T,A>>::type
+	prod(ublas::vector<T, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
   {
 	ublas::vector<T, A> result(b.size2());
 	prod(a, b, result, queue);
@@ -464,7 +506,11 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data
   */
   template<class T>
-  T inner_prod(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, T init, compute::command_queue& queue)
+  typename std::enable_if<std::is_same<T, int>::value |
+	std::is_same<T, float>::value |
+	std::is_same<T, double>::value,
+	T>::type
+	inner_prod(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, T init, compute::command_queue& queue)
   {
 	//check that both vectors are on the same device
 	assert((a.device() == b.device()) && (a.device() == queue.get_device()));
@@ -488,13 +534,15 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data
   */
   template<class T, class A>
-  T inner_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, T init, compute::command_queue& queue)
+  typename std::enable_if<std::is_same<T, int>::value |
+	std::is_same<T, float>::value |
+	std::is_same<T, double>::value,
+	T>::type
+	inner_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, T init, compute::command_queue& queue)
   {
-	ublas::vector<T, opencl::storage> aHolder(a.size() , queue.get_context());
-	aHolder.from_host(a, queue);
+	ublas::vector<T, opencl::storage> aHolder(a, queue);
 
-	ublas::vector<T, opencl::storage> bHolder(b.size(), queue.get_context());
-	bHolder.from_host(b, queue);
+	ublas::vector<T, opencl::storage> bHolder(b, queue);
 
 	return inner_prod(aHolder, bHolder, init, queue);
   }
@@ -516,7 +564,12 @@ template <class T, class L, class A>
   * \tparam L layout of the matrix (row_major or column_major)
   */
   template <class T, class L>
-  void outer_prod(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue & queue)
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	void>::type
+	outer_prod(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue & queue)
   {
 	//check all vectors are on same context
 	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
@@ -599,16 +652,19 @@ template <class T, class L, class A>
   * \tparam A storage type that has the data
   */
   template <class T, class L, class A>
-  void outer_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	void>::type
+	outer_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
   {
 
 	///copy the data from a to aHolder
-	ublas::vector<T, opencl::storage> aHolder(a.size(), queue.get_context());
-	aHolder.from_host(a, queue);
+	ublas::vector<T, opencl::storage> aHolder(a, queue);
 
 	///copy the data from b to bHolder
-	ublas::vector<T, opencl::storage> bHolder(b.size(), queue.get_context());
-	bHolder.from_host(b, queue);
+	ublas::vector<T, opencl::storage> bHolder(b, queue);
 
 	ublas::matrix<T, L, opencl::storage> resultHolder(a.size(), b.size(), queue.get_context());
 
@@ -634,7 +690,12 @@ template <class T, class L, class A>
   */
 
   template <class T,class L = ublas::basic_row_major<>, class A>
-  ublas::matrix<T, L, A> outer_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue )
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	ublas::matrix<T, L, A>>::type
+	outer_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, compute::command_queue &queue )
   {
 	ublas::matrix<T, L, A> result(a.size(), b.size());
 	outer_prod(a, b, result, queue);
@@ -710,12 +771,10 @@ template <class T, class L, class A>
   {
 
 	///copy the data from a to aHolder
-	ublas::matrix<T, L, opencl::storage> aHolder(a.size1(), a.size2(), queue.get_context());
-	aHolder.from_host(a, queue);
+	ublas::matrix<T, L, opencl::storage> aHolder(a, queue);
 
 	///copy the data from b to bHolder
-	ublas::matrix<T, L, opencl::storage> bHolder(b.size1(), b.size2(), queue.get_context());
-	bHolder.from_host(b, queue);
+	ublas::matrix<T, L, opencl::storage> bHolder(b, queue);
 
 	ublas::matrix<T, L, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
 
