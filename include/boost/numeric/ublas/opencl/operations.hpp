@@ -1408,44 +1408,85 @@ typename std::enable_if<std::is_same<T, float>::value |
 
   //Transpose
 
-  template<class L>
-	void transpose(ublas::matrix<float, L, opencl::storage>& m, ublas::matrix<float, L, opencl::storage>& result, compute::command_queue& queue)
+
+  //Kernel for transposition of various data types
+#define OPENCL_TRANSPOSITION_KERNEL(DATA_TYPE)	 "__kernel void transpose(__global "  #DATA_TYPE "* in, __global " #DATA_TYPE "* result, unsigned int width, unsigned int height) \n"\
+												 " { \n"\
+												 "unsigned int column_index = get_global_id(0); \n"\
+												 "unsigned int row_index = get_global_id(1); \n"\
+												 "if (column_index < width && row_index < height) \n"\
+												  "{ \n"\
+												  "unsigned int index_in = column_index + width * row_index; \n"\
+												  "unsigned int index_result = row_index + height * column_index; \n"\
+												  "result[index_result] = in[index_in]; \n"\
+												  "} \n"\
+												  "} \n"
+
+
+  /**This function computes the transposition of a matrix on an opencl device
+  * \param m is the input matrix that will be transposed (it's already on an opencl device)
+  * \param result is te matrix that will hold the result of the transposition
+  * \param queue is the command queue that its device will do the computation and will have the result
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the input matrix
+  */
+  template<class T, class L>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	void>::type
+	trans(ublas::matrix<T, L, opencl::storage>& m, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
   {
 
-	  const char* kernel = "__kernel void transpose(__global float *in, __global float* result, int width, int height) \n"
-	  " { \n"
-	  "unsigned int row_index = get_global_id(0); \n"
-	  "unsigned int column_index = get_global_id(1); \n"
-	  "if (row_index < width && column_index < height) \n"
-	  "{ \n"
-	  "unsigned int index_in = row_index + width * column_index; \n"
-	  "unsigned int index_result = column_index + height * row_index; \n"
-	  "result[index_result] = in[index_in]; \n"
-	  "} \n"
-	  "} \n";
+	//check the right dimensions
+	assert((m.size1() == result.size2()) && (m.size2() == result.size1()));
+
+	//assert all matrices are on the same device
+	assert((m.device() == result.device()) && (m.device() == queue.get_device()));
+
+	const char* kernel;
+
+
+	//decide the precision's kernel
+	if (std::is_same<T, float>::value)
+
+	  kernel = OPENCL_TRANSPOSITION_KERNEL(float);
+
+	else if (std::is_same<T, double>::value)
+
+	  kernel = OPENCL_TRANSPOSITION_KERNEL(double);
+
+	else if (std::is_same<T, std::complex<float>>::value)
+
+	  kernel = OPENCL_TRANSPOSITION_KERNEL(float2);
+
+	else if (std::is_same<T, std::complex<double>>::value)
+
+	  kernel = OPENCL_TRANSPOSITION_KERNEL(double2);
+
 
 	size_t len = strlen(kernel);
 	cl_int err;
 
 	cl_context c_context = queue.get_context().get();
 	cl_program program = clCreateProgramWithSource(c_context, 1, &kernel, &len, &err);
-	err = clBuildProgram(program, 1, &queue.get_device().get(), NULL, NULL, NULL);
+	clBuildProgram(program, 1, &queue.get_device().get(), NULL, NULL, NULL);
 
 
 
 
 	cl_kernel c_kernel = clCreateKernel(program, "transpose", &err);
 
-	int width = std::is_same < L, ublas::basic_row_major<>>::value ? m.size1() : m.size2();
-	int height = std::is_same < L, ublas::basic_row_major<>>::value ? m.size2() : m.size1();
+	int width = std::is_same < L, ublas::basic_row_major<>>::value ? m.size2() : m.size1();
+	int height = std::is_same < L, ublas::basic_row_major<>>::value ? m.size1() : m.size2();
 
-	size_t global_size[2] = { height , width };
-	size_t offset = 0;
-	size_t local_size = 0;
-	err = clSetKernelArg(c_kernel, 0, sizeof(float*), &m.begin().get_buffer().get());
-	err = clSetKernelArg(c_kernel, 1, sizeof(float*), &result.begin().get_buffer().get());
-	err = clSetKernelArg(c_kernel, 2, sizeof(int), &height);
-	err = clSetKernelArg(c_kernel, 3, sizeof(int), &width);
+	size_t global_size[2] = { width , height };
+	clSetKernelArg(c_kernel, 0, sizeof(T*), &m.begin().get_buffer().get());
+	clSetKernelArg(c_kernel, 1, sizeof(T*), &result.begin().get_buffer().get());
+	clSetKernelArg(c_kernel, 2, sizeof(unsigned int), &width);
+	clSetKernelArg(c_kernel, 3, sizeof(unsigned int), &height);
 
 
 	cl_command_queue c_queue = queue.get();
@@ -1458,6 +1499,52 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
+  /**This function computes the transposition of a matrix on host
+  * \param m is the input matrix that will be transposed (it's on host)
+  * \param result is te matrix that will hold the result of the transposition
+  * \param queue is the command queue that its device will do the computation
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the input matrix
+  */
+	template<class T, class L, class A>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	void>::type
+	trans(ublas::matrix<T, L, A>& m, ublas::matrix<T, L, A>& result, compute::command_queue& queue)
+  {
+	ublas::matrix<T, L, opencl::storage> mHolder(m, queue);
+
+	ublas::matrix<T, L, opencl::storage> resultHolder(result.size1(), result.size2(), queue.get_context());
+
+	trans(mHolder, resultHolder, queue);
+
+	resultHolder.to_host(result, queue);
+  }
+
+
+  /**This function computes the transposition of a matrix on host and returns the result as a return value
+  * \param m is the input matrix that will be transposed (it's on host)
+  * \param result is te matrix that will hold the result of the transposition
+  * \param queue is the command queue that its device will do the computation
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the input matrix
+  */
+  template<class T, class L, class A>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	ublas::matrix<T, L, A>>::type
+	trans(ublas::matrix<T, L, A>& m, compute::command_queue& queue)
+  {
+	ublas::matrix<T, L, A> result(m.size2(), m.size1());
+	trans(m, result, queue);
+	return result;
+  }
 
 
 }//opencl
