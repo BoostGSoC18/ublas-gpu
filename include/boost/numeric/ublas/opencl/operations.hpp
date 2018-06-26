@@ -1406,7 +1406,56 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
+  //Transpose
 
+  template<class L>
+	void transpose(ublas::matrix<float, L, opencl::storage>& m, ublas::matrix<float, L, opencl::storage>& result, compute::command_queue& queue)
+  {
+
+	  const char* kernel = "__kernel void transpose(__global float *in, __global float* result, int width, int height) \n"
+	  " { \n"
+	  "unsigned int row_index = get_global_id(0); \n"
+	  "unsigned int column_index = get_global_id(1); \n"
+	  "if (row_index < width && column_index < height) \n"
+	  "{ \n"
+	  "unsigned int index_in = row_index + width * column_index; \n"
+	  "unsigned int index_result = column_index + height * row_index; \n"
+	  "result[index_result] = in[index_in]; \n"
+	  "} \n"
+	  "} \n";
+
+	size_t len = strlen(kernel);
+	cl_int err;
+
+	cl_context c_context = queue.get_context().get();
+	cl_program program = clCreateProgramWithSource(c_context, 1, &kernel, &len, &err);
+	err = clBuildProgram(program, 1, &queue.get_device().get(), NULL, NULL, NULL);
+
+
+
+
+	cl_kernel c_kernel = clCreateKernel(program, "transpose", &err);
+
+	int width = std::is_same < L, ublas::basic_row_major<>>::value ? m.size1() : m.size2();
+	int height = std::is_same < L, ublas::basic_row_major<>>::value ? m.size2() : m.size1();
+
+	size_t global_size[2] = { height , width };
+	size_t offset = 0;
+	size_t local_size = 0;
+	err = clSetKernelArg(c_kernel, 0, sizeof(float*), &m.begin().get_buffer().get());
+	err = clSetKernelArg(c_kernel, 1, sizeof(float*), &result.begin().get_buffer().get());
+	err = clSetKernelArg(c_kernel, 2, sizeof(int), &height);
+	err = clSetKernelArg(c_kernel, 3, sizeof(int), &width);
+
+
+	cl_command_queue c_queue = queue.get();
+
+	cl_event event = NULL;
+	clEnqueueNDRangeKernel(c_queue, c_kernel, 2, NULL, global_size, NULL, 0, NULL, &event);
+
+
+	clWaitForEvents(1, &event);
+  }
 
 
 
