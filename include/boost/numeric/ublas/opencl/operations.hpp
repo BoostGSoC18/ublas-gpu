@@ -1547,6 +1547,122 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
+
+
+  //Change Layout of matrix (from row-major to column-major and vise versa)
+
+  /**This function changes the layout of the matrix (from row-major to column-major and vise versa) of a matrix on opencl device
+  * \param m is the input matrix that its layout will be changed (it's already on an opencl device)
+  * \param result is te matrix that will hold the result
+  * \param queue is the command queue that its device will do the computation and will have the result
+  *
+  * \tparam T is the data type
+  * \tparam L1 is the layout of the input matrix
+  * \tparam L2 is the layout of the output matrix
+  */
+  template<class T, class L1, class L2>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	void>::type
+	change_layout(ublas::matrix<T, L1, opencl::storage>& m, ublas::matrix<T, L2, opencl::storage>& result, compute::command_queue& queue)
+  {
+
+	//check the right dimensions
+	assert((m.size1() == result.size1()) && (m.size2() == result.size2()));
+
+	//assert all matrices are on the same device
+	assert((m.device() == result.device()) && (m.device() == queue.get_device()));
+
+	//make sure the input layout is not the requires layout
+	assert(!(std::is_same<L1, L2>::value));
+
+	const char* kernel;
+
+
+	//decide the precision's kernel
+	if (std::is_same<T, float>::value)
+
+	  kernel = OPENCL_TRANSPOSITION_KERNEL(float);
+
+	else if (std::is_same<T, double>::value)
+
+	  kernel = OPENCL_TRANSPOSITION_KERNEL(double);
+
+	else if (std::is_same<T, std::complex<float>>::value)
+
+	  kernel = OPENCL_TRANSPOSITION_KERNEL(float2);
+
+	else if (std::is_same<T, std::complex<double>>::value)
+
+	  kernel = OPENCL_TRANSPOSITION_KERNEL(double2);
+
+
+	size_t len = strlen(kernel);
+	cl_int err;
+
+	cl_context c_context = queue.get_context().get();
+	cl_program program = clCreateProgramWithSource(c_context, 1, &kernel, &len, &err);
+	clBuildProgram(program, 1, &queue.get_device().get(), NULL, NULL, NULL);
+
+
+
+
+	cl_kernel c_kernel = clCreateKernel(program, "transpose", &err);
+
+	int width = std::is_same < L1, ublas::basic_row_major<>>::value ? m.size2() : m.size1();
+	int height = std::is_same < L1, ublas::basic_row_major<>>::value ? m.size1() : m.size2();
+
+	size_t global_size[2] = { width , height };
+	clSetKernelArg(c_kernel, 0, sizeof(T*), &m.begin().get_buffer().get());
+	clSetKernelArg(c_kernel, 1, sizeof(T*), &result.begin().get_buffer().get());
+	clSetKernelArg(c_kernel, 2, sizeof(unsigned int), &width);
+	clSetKernelArg(c_kernel, 3, sizeof(unsigned int), &height);
+
+
+	cl_command_queue c_queue = queue.get();
+
+	cl_event event = NULL;
+	clEnqueueNDRangeKernel(c_queue, c_kernel, 2, NULL, global_size, NULL, 0, NULL, &event);
+
+
+	clWaitForEvents(1, &event);
+  }
+
+
+
+
+
+  /**This function changes the layout of the matrix (from row-major to column-major and vise versa) of a matrix on host
+  * \param m is the input matrix that its layout will bw changed (it's on host)
+  * \param result is te matrix that will hold the result
+  * \param queue is the command queue that its device will do the computation
+  *
+  * \tparam T is the data type
+  * \tparam L1 is the layout of the input matrix
+  * \tparam L2 is the layout of the output matrix
+  */
+  template<class T, class L1, class L2, class A>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	void>::type
+	change_layout(ublas::matrix<T, L1, A>& m, ublas::matrix<T, L2, A>& result, compute::command_queue& queue)
+  {
+	ublas::matrix<T, L1, opencl::storage> mHolder(m, queue);
+
+	ublas::matrix<T, L2, opencl::storage> resultHolder(result.size1(), result.size2(), queue.get_context());
+
+	change_layout(mHolder, resultHolder, queue);
+
+	resultHolder.to_host(result, queue);
+  }
+
+
+
+
 }//opencl
 
 }//ublas
