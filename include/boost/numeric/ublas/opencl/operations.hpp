@@ -38,14 +38,14 @@ namespace ublas = boost::numeric::ublas;
 * \tparam T datatype of the matrices
 * \tparam L layout of the matrices (row_major or column_major)
 */
-template <class T, class L>
+template <class T, class L1, class L2>
 
 typename std::enable_if<std::is_same<T, float>::value |
   std::is_same<T, double>::value |
   std::is_same<T, std::complex<float>>::value |
   std::is_same<T, std::complex<double>>::value, 
   void>::type
-prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result , compute::command_queue & queue)
+prod(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result , compute::command_queue & queue)
 {
 
   //check all matrices are on same context
@@ -56,9 +56,28 @@ prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storag
 
   result.fill(0, queue);
 
+  ublas::matrix<T, L1, opencl::storage>* b_L1 = NULL; //to hold matrix b with layout 1 if the b has different layout 
+
+ 
+
   cl_event event = NULL;
 
-  clblasOrder Order = std::is_same<L, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
+  cl_mem buffer_a = (cl_mem)a.begin().get_buffer().get();
+  cl_mem buffer_b = (cl_mem)b.begin().get_buffer().get();
+  cl_mem buffer_result = (cl_mem)result.begin().get_buffer().get();
+
+
+
+  if (!(std::is_same<L1, L2>::value))
+  {
+	b_L1 = new ublas::matrix<T, L1, opencl::storage>(b.size1(), b.size2(), queue.get_context());
+	change_layout(b, (*b_L1), queue);
+	buffer_b = (cl_mem)b_L1->begin().get_buffer().get();
+  }
+
+
+
+  clblasOrder Order = std::is_same<L1, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
   int lda = Order == clblasRowMajor ? a.size2() : a.size1();
   int ldb = Order == clblasRowMajor ? b.size2() : a.size2();
   int ldc = Order == clblasRowMajor ? b.size2() : a.size1();
@@ -69,9 +88,9 @@ prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storag
 	//Call clBLAS extended function. Perform gemm for float
 	clblasSgemm(Order, clblasNoTrans, clblasNoTrans,
 	  a.size1(), b.size2(), a.size2(),
-	  1, (cl_mem)a.begin().get_buffer().get(), 0, lda,
-	  (cl_mem)b.begin().get_buffer().get(), 0, ldb, 1,
-	  (cl_mem)result.begin().get_buffer().get(), 0, ldc,
+	  1, buffer_a, 0, lda,
+	  buffer_b, 0, ldb, 1,
+	  buffer_result, 0, ldc,
 	  1, &(queue.get()), 0, NULL, &event);
 
 
@@ -79,27 +98,27 @@ prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storag
 	//Call clBLAS extended function. Perform gemm for double
 	clblasDgemm(Order, clblasNoTrans, clblasNoTrans,
 	  a.size1(), b.size2(), a.size2(),
-	  1, (cl_mem)a.begin().get_buffer().get(), 0, lda,
-	  (cl_mem)b.begin().get_buffer().get(), 0, ldb, 1,
-	  (cl_mem)result.begin().get_buffer().get(), 0, ldc,
+	  1, buffer_a, 0, lda,
+	  buffer_b, 0, ldb, 1,
+	  buffer_result, 0, ldc,
 	  1, &(queue.get()), 0, NULL, &event);
 
   else if (std::is_same<T, std::complex<float>>::value)
 	//Call clBLAS extended function. Perform gemm for complext float
 	clblasCgemm(Order, clblasNoTrans, clblasNoTrans,
 	  a.size1(), b.size2(), a.size2(),
-	  ONE_FLOAT_COMPLEX, (cl_mem)a.begin().get_buffer().get(), 0, lda,
-	  (cl_mem)b.begin().get_buffer().get(), 0, ldb, ONE_FLOAT_COMPLEX,
-	  (cl_mem)result.begin().get_buffer().get(), 0, ldc,
+	  ONE_FLOAT_COMPLEX, buffer_a, 0, lda,
+	  buffer_b, 0, ldb, ONE_FLOAT_COMPLEX,
+	  buffer_result, 0, ldc,
 	  1, &(queue.get()), 0, NULL, &event);
 
   else if (std::is_same<T, std::complex<double>>::value)
 	//Call clBLAS extended function. Perform gemm for complex double
 	clblasZgemm(Order, clblasNoTrans, clblasNoTrans,
 	  a.size1(), b.size2(), a.size2(),
-	  ONE_DOUBLE_COMPLEX, (cl_mem)a.begin().get_buffer().get(), 0, lda,
-	  (cl_mem)b.begin().get_buffer().get(), 0, ldb, ONE_DOUBLE_COMPLEX,
-	  (cl_mem)result.begin().get_buffer().get(), 0, ldc,
+	  ONE_DOUBLE_COMPLEX, buffer_a, 0, lda,
+	  buffer_b, 0, ldb, ONE_DOUBLE_COMPLEX,
+	  buffer_result, 0, ldc,
 	  1, &(queue.get()), 0, NULL, &event);
 
 
@@ -107,6 +126,7 @@ prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storag
   //Wait for calculations to be finished.
   clWaitForEvents(1, &event);
 
+  if (b_L1 != NULL) delete b_L1;
 
 
 }
@@ -128,22 +148,22 @@ prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storag
 * \tparam L layout of the matrices (row_major or column_major)
 * \tparam A storage type that has the data of the matrices
 */
-template <class T, class L, class A>
+template <class T, class L1, class L2, class A>
 typename std::enable_if<std::is_same<T, float>::value |
   std::is_same<T, double>::value |
   std::is_same<T, std::complex<float>>::value |
   std::is_same<T, std::complex<double>>::value,
   void>::type
-  prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  prod(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, ublas::matrix<T, L1, A>& result, compute::command_queue &queue)
 {
 
   ///copy the data from a to aHolder
-  ublas::matrix<T, L, opencl::storage> aHolder(a, queue);
+  ublas::matrix<T, L1, opencl::storage> aHolder(a, queue);
 
   ///copy the data from b to bHolder
-  ublas::matrix<T, L, opencl::storage> bHolder(b, queue);
+  ublas::matrix<T, L2, opencl::storage> bHolder(b, queue);
 
-  ublas::matrix<T, L, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
+  ublas::matrix<T, L1, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
 
   prod(aHolder, bHolder, resultHolder, queue); //call the prod function that multiplies
 
@@ -166,15 +186,15 @@ typename std::enable_if<std::is_same<T, float>::value |
 * \tparam A storage type that has the data of the matrices
 */
 
-template <class T, class L, class A>
+template <class T, class L1, class L2, class A>
 typename std::enable_if<std::is_same<T, float>::value |
   std::is_same<T, double>::value |
   std::is_same<T, std::complex<float>>::value |
   std::is_same<T, std::complex<double>>::value,
-  ublas::matrix<T,L,A>>::type
-  prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  ublas::matrix<T,L1,A>>::type
+  prod(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, compute::command_queue &queue)
 {
-  ublas::matrix<T, L, A> result(a.size1(), b.size2());
+  ublas::matrix<T, L1, A> result(a.size1(), b.size2());
   prod(a, b, result, queue);
   return result;
 }
