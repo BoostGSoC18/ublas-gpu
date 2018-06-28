@@ -748,8 +748,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam T datatype of the matrices
   * \tparam L layout of the matrices (row_major or column_major)
   */
-  template <class T, class L, class binary_operator>
-  void element_wise(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, binary_operator fun, compute::command_queue& queue)
+  template <class T, class L1, class L2, class binary_operator>
+  void element_wise(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result, binary_operator fun, compute::command_queue& queue)
   {
 	//check all matrices are on same context
 	assert((a.device() == b.device()) && (a.device() == result.device()) && (a.device() == queue.get_device()));
@@ -760,14 +760,44 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 	result.fill(0, queue);
 
-	compute::transform(a.begin(),
-	  a.end(),
-	  b.begin(),
-	  result.begin(),
-	  fun,
-	  queue);
+	bool flag_different_layout = false;
+	ublas::matrix<T, L1, opencl::storage>* b_L1 = NULL;
+
+	if (!(std::is_same<L1, L2>::value))
+	{
+	  b_L1 = new ublas::matrix<T, L1, opencl::storage>(b.size1(), b.size2(), queue.get_context());
+	  change_layout(b, (*b_L1), queue);
+	  flag_different_layout = true;
+	}
+
+
+	if (flag_different_layout == false)
+	{
+	  compute::transform(a.begin(),
+		a.end(),
+		b.begin(),
+		result.begin(),
+		fun,
+		queue);
+	}
+
+	else
+	{
+	  compute::transform(a.begin(),
+		a.end(),
+		b_L1->begin(),
+		result.begin(),
+		fun,
+		queue);
+
+	}
 
 	queue.finish();
+
+	if (flag_different_layout)
+	{
+	  delete b_L1;
+	}
   }
 
 
@@ -786,17 +816,17 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam L layout of the matrices (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
-  template <class T, class L, class A, class binary_operator>
-  void element_wise(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, binary_operator fun, compute::command_queue &queue)
+  template <class T, class L1, class L2, class A, class binary_operator>
+  void element_wise(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, ublas::matrix<T, L1, A>& result, binary_operator fun, compute::command_queue &queue)
   {
 
 	///copy the data from a to aHolder
-	ublas::matrix<T, L, opencl::storage> aHolder(a, queue);
+	ublas::matrix<T, L1, opencl::storage> aHolder(a, queue);
 
 	///copy the data from b to bHolder
-	ublas::matrix<T, L, opencl::storage> bHolder(b, queue);
+	ublas::matrix<T, L2, opencl::storage> bHolder(b, queue);
 
-	ublas::matrix<T, L, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
+	ublas::matrix<T, L1, opencl::storage> resultHolder(a.size1(), b.size2(), queue.get_context());
 
 	element_wise(aHolder, bHolder, resultHolder, fun, queue); //call the add function that performs sumition
 
@@ -817,10 +847,10 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam L layout of the matrices (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
-  template <class T, class L, class A, class binary_operator>
-  ublas::matrix<T, L, A> element_wise(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, binary_operator fun, compute::command_queue &queue)
+  template <class T, class L1, class L2, class A, class binary_operator>
+  ublas::matrix<T, L1, A> element_wise(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, binary_operator fun, compute::command_queue &queue)
   {
-	ublas::matrix<T, L, A> result(a.size1(), b.size2());
+	ublas::matrix<T, L1, A> result(a.size1(), b.size2());
 	element_wise(a, b, result, fun, queue);
 	return result;
   }
@@ -943,8 +973,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam T datatype of the matrices
   * \tparam L layout of the matrices (row_major or column_major)
   */
-  template <class T, class L>
-  void element_add(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  template <class T, class L1, class L2>
+  void element_add(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, result, compute::plus<T>(), queue);
   }
@@ -963,8 +993,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam L layout of the matrices (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
-  template <class T, class L, class A>
-  void element_add(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  template <class T, class L1, class L2, class A>
+  void element_add(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, ublas::matrix<T, L1, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::plus<T>(), queue);
   }
@@ -983,8 +1013,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam A storage type that has the data of the matrices
   */
 
-  template <class T, class L, class A>
-  ublas::matrix<T, L, A> element_add(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  template <class T, class L1, class L2, class A>
+  ublas::matrix<T, L1, A> element_add(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::plus<T>(), queue);
   }
@@ -1068,8 +1098,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam T datatype of the matrices
   * \tparam L layout of the matrices (row_major or column_major)
   */
-  template <class T, class L>
-  void element_sub(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  template <class T, class L1, class L2>
+  void element_sub(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, compute::minus<T>(), result, queue);
   }
@@ -1088,8 +1118,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam L layout of the matrices (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
-  template <class T, class L, class A>
-  void element_sub(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  template <class T, class L1, class L2, class A>
+  void element_sub(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, ublas::matrix<T, L1, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::minus<T>(), queue);
   }
@@ -1108,8 +1138,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam A storage type that has the data of the matrices
   */
 
-  template <class T, class L, class A>
-  ublas::matrix<T, L, A> element_sub(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  template <class T, class L1, class L2, class A>
+  ublas::matrix<T, L1, A> element_sub(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::minus<T>(), queue);
   }
@@ -1196,8 +1226,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam T datatype of the matrices
   * \tparam L layout of the matrices (row_major or column_major)
   */
-  template <class T, class L>
-  void element_prod(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  template <class T, class L1, class L2>
+  void element_prod(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, result, compute::multiplies<T>(), queue);
   }
@@ -1216,8 +1246,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam L layout of the matrices (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
-  template <class T, class L, class A>
-  void element_prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  template <class T, class L1, class L2, class A>
+  void element_prod(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, ublas::matrix<T, L1, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::multiplies<T>(), queue);
   }
@@ -1236,8 +1266,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam A storage type that has the data of the matrices
   */
 
-  template <class T, class L, class A>
-  ublas::matrix<T, L, A> element_prod(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  template <class T, class L1, class L2, class A>
+  ublas::matrix<T, L1, A> element_prod(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::multiplies<T>(), queue);
   }
@@ -1320,8 +1350,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam T datatype of the matrices
   * \tparam L layout of the matrices (row_major or column_major)
   */
-  template <class T, class L>
-  void element_div(ublas::matrix<T, L, opencl::storage>& a, ublas::matrix<T, L, opencl::storage>& b, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  template <class T, class L1, class L2>
+  void element_div(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result, compute::command_queue& queue)
   {
 	element_wise(a, b, result, compute::divides<T>(), queue);
   }
@@ -1340,8 +1370,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam L layout of the matrices (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
-  template <class T, class L, class A>
-  void element_div(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, ublas::matrix<T, L, A>& result, compute::command_queue &queue)
+  template <class T, class L1, class L2, class A>
+  void element_div(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, ublas::matrix<T, L1, A>& result, compute::command_queue &queue)
   {
 	element_wise(a, b, result, compute::divides<T>(), queue);
   }
@@ -1360,8 +1390,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam A storage type that has the data of the matrices
   */
 
-  template <class T, class L, class A>
-  ublas::matrix<T, L, A> element_div(ublas::matrix<T, L, A>& a, ublas::matrix<T, L, A>& b, compute::command_queue &queue)
+  template <class T, class L1, class L2, class A>
+  ublas::matrix<T, L1, A> element_div(ublas::matrix<T, L1, A>& a, ublas::matrix<T, L2, A>& b, compute::command_queue &queue)
   {
 	return element_wise(a, b, compute::divides<T>(), queue);
   }
