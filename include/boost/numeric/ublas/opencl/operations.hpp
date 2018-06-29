@@ -36,7 +36,8 @@ namespace ublas = boost::numeric::ublas;
 * \param queue has the queue of the device which has the result matrix and which will do the computation
 *
 * \tparam T datatype of the matrices
-* \tparam L layout of the matrices (row_major or column_major)
+* \tparam L1 layout of the first matrix matrix (row_major or column_major)
+* \tparam L2 layout of the second matrix matrix (row_major or column_major)
 */
 template <class T, class L1, class L2>
 
@@ -145,7 +146,8 @@ prod(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::stor
 * \param queue has the queue of the device which has the result matrix and which will do the computation
 *
 * \tparam T datatype of the matrices
-* \tparam L layout of the matrices (row_major or column_major)
+* \tparam L1 layout of the first matrix matrix (row_major or column_major)
+* \tparam L2 layout of the second matrix matrix (row_major or column_major)
 * \tparam A storage type that has the data of the matrices
 */
 template <class T, class L1, class L2, class A>
@@ -182,7 +184,8 @@ typename std::enable_if<std::is_same<T, float>::value |
 * \param queue has the queue of the device which has the result matrix and which will do the computation
 *
 * \tparam T datatype of the matrices
-* \tparam L layout of the matrices (row_major or column_major)
+* \tparam L1 layout of the first matrix matrix (row_major or column_major)
+* \tparam L2 layout of the second matrix matrix (row_major or column_major)
 * \tparam A storage type that has the data of the matrices
 */
 
@@ -746,7 +749,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   */
   template <class T, class L1, class L2, class binary_operator>
   void element_wise(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result, binary_operator fun, compute::command_queue& queue)
@@ -813,7 +817,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
   template <class T, class L1, class L2, class A, class binary_operator>
@@ -844,7 +849,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
   template <class T, class L1, class L2, class A, class binary_operator>
@@ -971,7 +977,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   */
   template <class T, class L1, class L2>
   void element_add(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result, compute::command_queue& queue)
@@ -990,7 +997,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
   template <class T, class L1, class L2, class A>
@@ -1009,7 +1017,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
 
@@ -1096,7 +1105,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   */
   template <class T, class L1, class L2>
   void element_sub(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result, compute::command_queue& queue)
@@ -1115,7 +1125,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
   template <class T, class L1, class L2, class A>
@@ -1134,7 +1145,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
 
@@ -1224,7 +1236,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   */
   template <class T, class L1, class L2>
   void element_prod(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result, compute::command_queue& queue)
@@ -1243,7 +1256,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
   template <class T, class L1, class L2, class A>
@@ -1262,7 +1276,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
 
@@ -1348,7 +1363,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   */
   template <class T, class L1, class L2>
   void element_div(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::storage>& b, ublas::matrix<T, L1, opencl::storage>& result, compute::command_queue& queue)
@@ -1367,7 +1383,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
   template <class T, class L1, class L2, class A>
@@ -1386,7 +1403,8 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue has the queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
-  * \tparam L layout of the matrices (row_major or column_major)
+  * \tparam L1 layout of the first matrix matrix (row_major or column_major)
+  * \tparam L2 layout of the second matrix matrix (row_major or column_major)
   * \tparam A storage type that has the data of the matrices
   */
 
@@ -1479,7 +1497,7 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue is the command queue that its device will do the computation and will have the result
   *
   * \tparam T is the data type
-  * \tparam L is the layout of the input matrix
+  * \tparam L is the layout of the matrices
   */
   template<class T, class L>
   typename std::enable_if<std::is_same<T, float>::value |
@@ -1555,7 +1573,7 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue is the command queue that its device will do the computation
   *
   * \tparam T is the data type
-  * \tparam L is the layout of the input matrix
+  * \tparam L is the layout of the matrices
   */
 	template<class T, class L, class A>
   typename std::enable_if<std::is_same<T, float>::value |
@@ -1581,7 +1599,7 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \param queue is the command queue that its device will do the computation
   *
   * \tparam T is the data type
-  * \tparam L is the layout of the input matrix
+  * \tparam L is the layout of the matrices
   */
   template<class T, class L, class A>
   typename std::enable_if<std::is_same<T, float>::value |
@@ -1711,7 +1729,125 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
+  //Norm of vector
 
+
+  /** This function computes ||v||1 on opencl device
+  *
+  * \param v the vector on opencl device which its norm_1 will be computed
+  * \param queue is the command_queue that will execute the operations
+  *
+  * \tparam T is the data type 
+  */
+  template<class T>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	T>::type norm_1(ublas::vector<T, opencl::storage>& v, compute::command_queue& queue)
+  {
+
+	//temporary buffer needed by the kernel
+	compute::vector<T> scratch_buffer(v.size(), queue.get_context());
+
+	//to create a buffer to hold the absolute sum and gain access to return the value
+	compute::vector<T> result_buffer(1, queue.get_context());
+
+	cl_event event;
+
+	if (std::is_same<T, float>::value)
+	{
+	  clblasSasum(v.size(),
+		(cl_mem)result_buffer.begin().get_buffer().get(), //result buffer
+		0, //offset in result buffer
+		(cl_mem)v.begin().get_buffer().get(), //input buffer
+		0, //offset in input buffer
+		1, //increment in input buffer
+		(cl_mem)scratch_buffer.begin().get_buffer().get(), //scratch (temp) buffer
+		1, //number of command queues
+		&(queue.get()), //queue
+		0, // number of events waiting list
+		NULL, //event waiting list
+		&event); //event
+	}
+
+	else if (std::is_same<T, double>::value)
+	{
+	  clblasDasum(v.size(),
+		(cl_mem)result_buffer.begin().get_buffer().get(), //result buffer
+		0, //offset in result buffer
+		(cl_mem)v.begin().get_buffer().get(), //input buffer
+		0, //offset in input buffer
+		1, //increment in input buffer
+		(cl_mem)scratch_buffer.begin().get_buffer().get(), //scratch (temp) buffer
+		1, //number of command queues
+		&(queue.get()), //queue
+		0, // number of events waiting list
+		NULL, //event waiting list
+		&event); //event
+	}
+
+	else if (std::is_same<T, std::complex<float>>::value)
+	{
+	  clblasScasum(v.size(),
+		(cl_mem)result_buffer.begin().get_buffer().get(), //result buffer
+		0, //offset in result buffer
+		(cl_mem)v.begin().get_buffer().get(), //input buffer
+		0, //offset in input buffer
+		1, //increment in input buffer
+		(cl_mem)scratch_buffer.begin().get_buffer().get(), //scratch (temp) buffer
+		1, //number of command queues
+		&(queue.get()), //queue
+		0, // number of events waiting list
+		NULL, //event waiting list
+		&event); //event
+	}
+
+	else if (std::is_same<T, std::complex<double>>::value)
+	{
+	  clblasDzasum(v.size(),
+		(cl_mem)result_buffer.begin().get_buffer().get(), //result buffer
+		0, //offset in result buffer
+		(cl_mem)v.begin().get_buffer().get(), //input buffer
+		0, //offset in input buffer
+		1, //increment in input buffer
+		(cl_mem)scratch_buffer.begin().get_buffer().get(), //scratch (temp) buffer
+		1, //number of command queues
+		&(queue.get()), //queue
+		0, // number of events waiting list
+		NULL, //event waiting list
+		&event); //event
+	}
+
+
+	//Wait for calculations to be finished.
+	clWaitForEvents(1, &event);
+
+	return result_buffer[0];
+
+
+  }
+
+
+
+  /** This function computes ||v||1 of a vector on host
+  *
+  * \param v the vector on host which its norm_1 will be computed
+  * \param queue is the command_queue that will execute the operations
+  *
+  * \tparam T is the data type
+  */
+  template<class T, class A>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	T>::type norm_1(ublas::vector<T, A>& v, compute::command_queue& queue)
+  {
+	ublas::vector<T, opencl::storage> vHolder(v, queue);
+
+	return norm_1(vHolder, queue);
+  }
 
 }//opencl
 
