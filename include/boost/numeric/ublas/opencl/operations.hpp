@@ -1729,8 +1729,7 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  //Norm of vector
-
+  //Absolute sum of a vector
 
   /** This function computes absoulte sum of v elements on opencl device
   *
@@ -1848,6 +1847,129 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 	return a_sum(vHolder, queue);
   }
+
+
+
+  //Eucledian norm of a vector 
+
+  /** This function computes ||v||2 on opencl device
+  *
+  * \param v the vector on opencl device which its norm_2 will be computed
+  * \param queue is the command_queue that will execute the operations
+  *
+  * \tparam T is the data type
+  */
+  template<class T>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	T>::type norm_2(ublas::vector<T, opencl::storage>& v, compute::command_queue& queue)
+  {
+
+	//temporary buffer needed by the kernel
+	compute::vector<T> scratch_buffer(2*v.size(), queue.get_context());
+
+	//to create a buffer to hold the  ||v||2 and gain access to return the value
+	compute::vector<T> result_buffer(1, queue.get_context());
+
+	cl_event event;
+
+	if (std::is_same<T, float>::value)
+	{
+	  clblasSnrm2(v.size(),
+		(cl_mem)result_buffer.begin().get_buffer().get(), //result buffer
+		0, //offset in result buffer
+		(cl_mem)v.begin().get_buffer().get(), //input buffer
+		0, //offset in input buffer
+		1, //increment in input buffer
+		(cl_mem)scratch_buffer.begin().get_buffer().get(), //scratch (temp) buffer
+		1, //number of command queues
+		&(queue.get()), //queue
+		0, // number of events waiting list
+		NULL, //event waiting list
+		&event); //event
+	}
+
+	else if (std::is_same<T, double>::value)
+	{
+	  clblasDnrm2(v.size(),
+		(cl_mem)result_buffer.begin().get_buffer().get(), //result buffer
+		0, //offset in result buffer
+		(cl_mem)v.begin().get_buffer().get(), //input buffer
+		0, //offset in input buffer
+		1, //increment in input buffer
+		(cl_mem)scratch_buffer.begin().get_buffer().get(), //scratch (temp) buffer
+		1, //number of command queues
+		&(queue.get()), //queue
+		0, // number of events waiting list
+		NULL, //event waiting list
+		&event); //event
+	}
+
+	else if (std::is_same<T, std::complex<float>>::value)
+	{
+	  clblasScnrm2(v.size(),
+		(cl_mem)result_buffer.begin().get_buffer().get(), //result buffer
+		0, //offset in result buffer
+		(cl_mem)v.begin().get_buffer().get(), //input buffer
+		0, //offset in input buffer
+		1, //increment in input buffer
+		(cl_mem)scratch_buffer.begin().get_buffer().get(), //scratch (temp) buffer
+		1, //number of command queues
+		&(queue.get()), //queue
+		0, // number of events waiting list
+		NULL, //event waiting list
+		&event); //event
+	}
+
+	else if (std::is_same<T, std::complex<double>>::value)
+	{
+	  clblasDznrm2(v.size(),
+		(cl_mem)result_buffer.begin().get_buffer().get(), //result buffer
+		0, //offset in result buffer
+		(cl_mem)v.begin().get_buffer().get(), //input buffer
+		0, //offset in input buffer
+		1, //increment in input buffer
+		(cl_mem)scratch_buffer.begin().get_buffer().get(), //scratch (temp) buffer
+		1, //number of command queues
+		&(queue.get()), //queue
+		0, // number of events waiting list
+		NULL, //event waiting list
+		&event); //event
+	}
+
+
+	//Wait for calculations to be finished.
+	clWaitForEvents(1, &event);
+
+	return result_buffer[0];
+
+
+  }
+
+
+
+  /** This function computes ||v||2 of a vector on host
+  *
+  * \param v the vector on host which its norm_2 will be computed
+  * \param queue is the command_queue that will execute the operations
+  *
+  * \tparam T is the data type
+  */
+  template<class T, class A>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value |
+	std::is_same<T, std::complex<float>>::value |
+	std::is_same<T, std::complex<double>>::value,
+	T>::type norm_2(ublas::vector<T, A>& v, compute::command_queue& queue)
+  {
+	ublas::vector<T, opencl::storage> vHolder(v, queue);
+
+	return norm_2(vHolder, queue);
+  }
+
+
 
 }//opencl
 
