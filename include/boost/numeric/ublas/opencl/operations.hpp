@@ -1732,9 +1732,9 @@ typename std::enable_if<std::is_same<T, float>::value |
   //Norm of vector
 
 
-  /** This function computes ||v||1 on opencl device
+  /** This function computes absoulte sum of v elements on opencl device
   *
-  * \param v the vector on opencl device which its norm_1 will be computed
+  * \param v the vector on opencl device which its absolute sum will be computed
   * \param queue is the command_queue that will execute the operations
   *
   * \tparam T is the data type 
@@ -1744,7 +1744,7 @@ typename std::enable_if<std::is_same<T, float>::value |
 	std::is_same<T, double>::value |
 	std::is_same<T, std::complex<float>>::value |
 	std::is_same<T, std::complex<double>>::value,
-	T>::type norm_1(ublas::vector<T, opencl::storage>& v, compute::command_queue& queue)
+	T>::type a_sum(ublas::vector<T, opencl::storage>& v, compute::command_queue& queue)
   {
 
 	//temporary buffer needed by the kernel
@@ -1830,9 +1830,9 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 
 
-  /** This function computes ||v||1 of a vector on host
+  /** This function computes absolute sum of a vector on host
   *
-  * \param v the vector on host which its norm_1 will be computed
+  * \param v the vector on host which its  absolute sum will be computed
   * \param queue is the command_queue that will execute the operations
   *
   * \tparam T is the data type
@@ -1842,11 +1842,11 @@ typename std::enable_if<std::is_same<T, float>::value |
 	std::is_same<T, double>::value |
 	std::is_same<T, std::complex<float>>::value |
 	std::is_same<T, std::complex<double>>::value,
-	T>::type norm_1(ublas::vector<T, A>& v, compute::command_queue& queue)
+	T>::type a_sum(ublas::vector<T, A>& v, compute::command_queue& queue)
   {
 	ublas::vector<T, opencl::storage> vHolder(v, queue);
 
-	return norm_1(vHolder, queue);
+	return a_sum(vHolder, queue);
   }
 
 }//opencl
