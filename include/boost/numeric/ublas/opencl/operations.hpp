@@ -6,10 +6,10 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/functional.hpp>
 #include <boost/compute/buffer.hpp>
+#include <type_traits>
 
 /// Include the clBLAS header. It includes the appropriate OpenCL headers
 #include <clBLAS.h>
-#include <type_traits>
 
 namespace boost {
 namespace numeric {
@@ -20,6 +20,8 @@ namespace opencl
 {
 namespace compute = boost::compute;
 namespace ublas = boost::numeric::ublas;
+namespace compute_lambda = boost::compute::lambda;
+
 
 #define ONE_DOUBLE_COMPLEX  { { 1.0, 00.0 } }
 #define ONE_FLOAT_COMPLEX  { { 1.0f, 00.0f } }
@@ -529,9 +531,7 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam A storage type that has the data
   */
   template<class T>
-  typename std::enable_if<std::is_same<T, int>::value |
-	std::is_same<T, float>::value |
-	std::is_same<T, double>::value,
+  typename std::enable_if <(std::is_fundamental<T> ::value),
 	T>::type
 	inner_prod(ublas::vector<T, opencl::storage>& a, ublas::vector<T, opencl::storage>& b, T init, compute::command_queue& queue)
   {
@@ -557,9 +557,7 @@ typename std::enable_if<std::is_same<T, float>::value |
   * \tparam A storage type that has the data
   */
   template<class T, class A>
-  typename std::enable_if<std::is_same<T, int>::value |
-	std::is_same<T, float>::value |
-	std::is_same<T, double>::value,
+  typename std::enable_if <(std::is_fundamental<T> ::value),
 	T>::type
 	inner_prod(ublas::vector<T, A>& a, ublas::vector<T, A>& b, T init, compute::command_queue& queue)
   {
@@ -762,7 +760,6 @@ typename std::enable_if<std::is_same<T, float>::value |
 	//check that dimensions of matrices are equal
 	assert((a.size1() == b.size1()) && (a.size2() == b.size2()));
 
-	result.fill(0, queue);
 
 	bool flag_different_layout = false;
 	ublas::matrix<T, L1, opencl::storage>* b_L1 = NULL;
@@ -885,8 +882,6 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 	//check that dimensions of matrices are equal
 	assert(a.size() == b.size());
-
-	result.fill(0, queue);
 
 	compute::transform(a.begin(),
 	  a.end(),
@@ -1472,6 +1467,415 @@ typename std::enable_if<std::is_same<T, float>::value |
   {
 	return element_wise(a, b, compute::divides<T>(), queue);
   }
+
+
+
+  //Element-wise operations with constants
+
+
+	//Matrix - Constant Addition
+
+  /** This function adds a constant value to a matrix that is already on an opencl device
+  *
+  * \param m is the matrix that the value will be added to (its data exists on opencl device)
+  * \param value is the constant value that will be added
+  * \param result is the matrix that will hold the result of operation
+  * \param queue is the command queue that its device will execute the computaion
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the matrix
+  */
+  template<class T, class L>
+  void element_add(ublas::matrix<T, L, opencl::storage>& m, T value, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  {
+	//check all are on same device
+	assert((m.device() == result.device()) && (m.device() == queue.get_device()));
+
+	//check dimensions
+	assert((m.size1() == result.size1()) && (m.size2() == result.size2()));
+
+	boost::compute::transform(m.begin(), m.end(), result.begin(), compute_lambda::_1 + value, queue);
+
+	queue.finish();
+
+  }
+
+
+  /** This function adds a constant value to a matrix that is on host
+  *
+  * \param m is the matrix that the value will be added to (its data exists on host)
+  * \param value is the constant value that will be added
+  * \param result is the matrix that will hold the result of operation
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the matrix
+  * \tparam A is the storage type of the matrix
+  */
+  template<class T, class L, class A>
+  void element_add(ublas::matrix<T, L, A>& m, T value, ublas::matrix<T, L, A>& result, compute::command_queue& queue)
+  {
+	ublas::matrix<T, L, opencl::storage> mHolder(m, queue);
+	ublas::matrix<T, L, opencl::storage> resultHolder(result.size1(), result.size2(), queue.get_context());
+	element_add(mHolder, value, resultHolder, queue);
+
+	resultHolder.to_host(result, queue);
+  }
+
+  /** This function adds a constant value to a matrix that is on host and returns the result
+  *
+  * \param m is the matrix that the value will be added to (its data exists on host)
+  * \param value is the constant value that will be added
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the matrix
+  * \tparam A is the storage type of the matrix
+  */
+  template<class T, class L, class A>
+  ublas::matrix<T, L, A> element_add(ublas::matrix<T, L, A>& m, T value, compute::command_queue& queue)
+  {
+	ublas::matrix<T, L, A> result(m.size1(), m.size2());
+	element_add(m, value, result, queue);
+
+	return result;
+  }
+
+  //Vector - Constant addition
+
+  /** This function adds a constant value to a vector that is already on an opencl device
+  *
+  * \param m is the vector that the value will be added to (its data exists on opencl device)
+  * \param value is the constant value that will be added
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  */
+  template<class T>
+  void element_add(ublas::vector<T, opencl::storage>& v, T value, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  {
+	assert((v.device() == result.device()) && (v.device() == queue.get_device()));
+
+	assert(v.size() == result.size());
+
+	boost::compute::transform(v.begin(), v.end(), result.begin(), compute_lambda::_1 + value, queue);
+
+	queue.finish();
+  }
+
+  /** This function adds a constant value to a vector that is on host
+  *
+  * \param m is the vector that the value will be added to (its data exists on host)
+  * \param value is the constant value that will be added
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam A is the storage type of the vector
+  */
+  template<class T, class A>
+  void element_add(ublas::vector<T, A>& v, T value, ublas::vector<T, A>& result, compute::command_queue& queue)
+  {
+	ublas::vector<T, opencl::storage> vHolder(v, queue);
+	ublas::vector<T, opencl::storage> resultHolder(v.size(), queue.get_context());
+
+	element_add(vHolder, value, resultHolder, queue);
+
+	resultHolder.to_host(result, queue);
+  }
+
+  /** This function adds a constant value to a vector that is on host and the result will be returned
+  *
+  * \param m is the vector that the value will be added to (its data exists on host)
+  * \param value is the constant value that will be added
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam A is the storage type of the vector
+  */
+  template<class T, class A>
+  ublas::vector<T, A> element_add(ublas::vector<T, A>& v, T value, compute::command_queue& queue)
+  {
+	ublas::vector<T, A> result(v.size());
+
+	element_add(v, value, result, queue);
+
+	return result;
+  }
+
+
+
+
+
+
+  //Matrix - Constant subtraction
+
+  /** This function subtracts a constant value to a matrix that is already on an opencl device
+  *
+  * \param m is the matrix that the value will be subtracted to (its data exists on opencl device)
+  * \param value is the constant value that will be subtracted
+  * \param result is the matrix that will hold the result of operation
+  * \param queue is the command queue that its device will execute the computaion
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the matrix
+  */
+  template<class T, class L>
+  void element_sub(ublas::matrix<T, L, opencl::storage>& m, T value, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  {
+	//check all are on same device
+	assert((m.device() == result.device()) && (m.device() == queue.get_device()));
+
+	//check dimensions
+	assert((m.size1() == result.size1()) && (m.size2() == result.size2()));
+
+	boost::compute::transform(m.begin(), m.end(), result.begin(), compute_lambda::_1 - value, queue);
+
+	queue.finish();
+
+  }
+
+
+  /** This function subtracts a constant value to a matrix that is on host
+  *
+  * \param m is the matrix that the value will be subtracted to (its data exists on host)
+  * \param value is the constant value that will be subtracted
+  * \param result is the matrix that will hold the result of operation
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the matrix
+  * \tparam A is the storage type of the matrix
+  */
+  template<class T, class L, class A>
+  void element_sub(ublas::matrix<T, L, A>& m, T value, ublas::matrix<T, L, A>& result, compute::command_queue& queue)
+  {
+	ublas::matrix<T, L, opencl::storage> mHolder(m, queue);
+	ublas::matrix<T, L, opencl::storage> resultHolder(result.size1(), result.size2(), queue.get_context());
+	element_sub(mHolder, value, resultHolder, queue);
+
+	resultHolder.to_host(result, queue);
+  }
+
+  /** This function subtracts a constant value to a matrix that is on host and returns the result
+  *
+  * \param m is the matrix that the value will be subtracted to (its data exists on host)
+  * \param value is the constant value that will be subtracted
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the matrix
+  * \tparam A is the storage type of the matrix
+  */
+  template<class T, class L, class A>
+  ublas::matrix<T, L, A> element_sub(ublas::matrix<T, L, A>& m, T value, compute::command_queue& queue)
+  {
+	ublas::matrix<T, L, A> result(m.size1(), m.size2());
+	element_sub(m, value, result, queue);
+
+	return result;
+  }
+
+  //Vector - Constant subtraction
+
+  /** This function subtracts a constant value to a vector that is already on an opencl device
+  *
+  * \param m is the vector that the value will be subtracted to (its data exists on opencl device)
+  * \param value is the constant value that will be subtracted
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  */
+  template<class T>
+  void element_sub(ublas::vector<T, opencl::storage>& v, T value, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  {
+	assert((v.device() == result.device()) && (v.device() == queue.get_device()));
+
+	assert(v.size() == result.size());
+
+	boost::compute::transform(v.begin(), v.end(), result.begin(), compute_lambda::_1 - value, queue);
+
+	queue.finish();
+  }
+
+  /** This function subtracts a constant value to a vector that is on host
+  *
+  * \param m is the vector that the value will be subtracted to (its data exists on host)
+  * \param value is the constant value that will be subtracted
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam A is the storage type of the vector
+  */
+  template<class T, class A>
+  void element_sub(ublas::vector<T, A>& v, T value, ublas::vector<T, A>& result, compute::command_queue& queue)
+  {
+	ublas::vector<T, opencl::storage> vHolder(v, queue);
+	ublas::vector<T, opencl::storage> resultHolder(v.size(), queue.get_context());
+
+	element_sub(vHolder, value, resultHolder, queue);
+
+	resultHolder.to_host(result, queue);
+  }
+
+  /** This function subtracts a constant value to a vector that is on host and the result will be returned
+  *
+  * \param m is the vector that the value will be subtracted to (its data exists on host)
+  * \param value is the constant value that will be subtracted
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam A is the storage type of the vector
+  */
+  template<class T, class A>
+  ublas::vector<T, A> element_sub(ublas::vector<T, A>& v, T value, compute::command_queue& queue)
+  {
+	ublas::vector<T, A> result(v.size());
+
+	element_sub(v, value, result, queue);
+
+	return result;
+  }
+
+
+ 
+
+
+
+
+
+
+
+
+  //Matrix - Constant Multiplication
+
+  /** This function multiplies a constant value to a matrix that is already on an opencl device
+  *
+  * \param m is the matrix that the value will be multiplied to (its data exists on opencl device)
+  * \param value is the constant value that will be multiplied
+  * \param result is the matrix that will hold the result of operation
+  * \param queue is the command queue that its device will execute the computaion
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the matrix
+  */
+  template<class T, class L>
+	void element_scale(ublas::matrix<T, L, opencl::storage>& m, T value, ublas::matrix<T, L, opencl::storage>& result, compute::command_queue& queue)
+  {
+	//check all are on same device
+	assert((m.device() == result.device()) && (m.device() == queue.get_device()));
+
+	//check dimensions
+	assert((m.size1() == result.size1()) && (m.size2() == result.size2()));
+
+	boost::compute::transform(m.begin(), m.end(), result.begin(), compute_lambda::_1 * value, queue);
+
+	queue.finish();
+
+  }
+
+  /** This function multiplies a constant value to a matrix that is on host
+  *
+  * \param m is the matrix that the value will be multiplied to (its data exists on host)
+  * \param value is the constant value that will be multiplied
+  * \param result is the matrix that will hold the result of operation
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the matrix
+  * \tparam A is the storage type of the matrix
+  */
+  template<class T, class L, class A>
+   void element_scale(ublas::matrix<T, L, A>& m, T value, ublas::matrix<T, L, A>& result, compute::command_queue& queue)
+  {
+	ublas::matrix<T, L, opencl::storage> mHolder(m, queue);
+	ublas::matrix<T, L, opencl::storage> resultHolder(result.size1(), result.size2(), queue.get_context());
+	element_scale(mHolder, value, resultHolder, queue);
+
+	resultHolder.to_host(result, queue);
+  }
+
+  /** This function multiplies a constant value to a matrix that is on host and returns the result
+  *
+  * \param m is the matrix that the value will be multiplied to (its data exists on host)
+  * \param value is the constant value that will be multiplied
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam L is the layout of the matrix
+  * \tparam A is the storage type of the matrix
+  */
+  template<class T, class L, class A>
+	ublas::matrix<T, L, A>  element_scale(ublas::matrix<T, L, A>& m, T value, compute::command_queue& queue)
+  {
+	ublas::matrix<T, L, A> result(m.size1(), m.size2());
+	element_scale(m, value, result, queue);
+
+	return result;
+  }
+
+  //Vector - Constant multiplication
+
+  /** This function multiplies a constant value to a vector that is already on an opencl device
+  *
+  * \param m is the vector that the value will be multiplied to (its data exists on opencl device)
+  * \param value is the constant value that will be multiplied
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  */
+  template<class T>
+	void element_scale(ublas::vector<T, opencl::storage>& v, T value, ublas::vector<T, opencl::storage>& result, compute::command_queue& queue)
+  {
+	assert((v.device() == result.device()) && (v.device() == queue.get_device()));
+
+	assert(v.size() == result.size());
+
+	boost::compute::transform(v.begin(), v.end(), result.begin(), compute_lambda::_1 * value, queue);
+
+	queue.finish();
+  }
+
+  /** This function multiplies a constant value to a vector that is on host
+  *
+  * \param m is the vector that the value will be multiplied to (its data exists on host)
+  * \param value is the constant value that will be multiplied
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam A is the storage type of the vector
+  */
+  template<class T, class A>
+	void element_scale(ublas::vector<T, A>& v, T value, ublas::vector<T, A>& result, compute::command_queue& queue)
+  {
+	ublas::vector<T, opencl::storage> vHolder(v, queue);
+	ublas::vector<T, opencl::storage> resultHolder(v.size(), queue.get_context());
+
+	element_scale(vHolder, value, resultHolder, queue);
+
+	resultHolder.to_host(result, queue);
+  }
+
+  /** This function multiplies a constant value to a vector that is on host and the result will be returned
+  *
+  * \param m is the vector that the value will be multiplied to (its data exists on host)
+  * \param value is the constant value that will be multiplied
+  * \param queue is the command queue that its device will execute the computation
+  *
+  * \tparam T is the data type
+  * \tparam A is the storage type of the vector
+  */
+  template<class T, class A>
+	ublas::vector<T,A> element_scale(ublas::vector<T, A>& v, T value, compute::command_queue& queue)
+  {
+	ublas::vector<T, A> result(v.size());
+
+	element_scale(v, value, result, queue);
+
+	return result;
+  }
+
+
+
 
 
   //Transpose
