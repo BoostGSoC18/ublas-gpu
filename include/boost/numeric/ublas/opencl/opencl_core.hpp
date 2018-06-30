@@ -106,7 +106,7 @@ public:
   * \param q is the command queue of the device which will store the matrix and do the filling
   * \param value is the value that all elements of the matrix are set to
   */
-  matrix(size_type size1, size_type size2, compute::command_queue &q, const T& value)
+  matrix(size_type size1, size_type size2, const T& value, compute::command_queue &q)
 	: matrix_container<self_type>(),
 	size1_(size1), size2_(size2), device_(q.get_device())
   {
@@ -181,6 +181,8 @@ public:
   {
 	assert(device_ == queue.get_device());
 
+	assert((size2_ == m.size2()) && (size1_ == m.size1()));
+
 	compute::copy(
 	  m.data().begin(),
 	  m.data().end(),
@@ -200,6 +202,8 @@ public:
   void to_host(ublas::matrix<T, L, A>& m , compute::command_queue& queue)
   {
 	assert(device_ == queue.get_device());
+
+	assert((size2_ == m.size2()) && (size1_ == m.size1()));
 
 	compute::copy(
 	  this->begin(),
@@ -293,6 +297,8 @@ public:
   {
 	assert(this->device() == queue.get_device());
 
+	assert(this->size() == v.size());
+
 	compute::copy(
 	  v.begin(),
 	  v.end(),
@@ -312,6 +318,8 @@ public:
   void to_host(ublas::vector<T, A>& v, compute::command_queue& queue)
   {
 	assert(this->device() == queue.get_device());
+
+	assert(this->size() == v.size());
 
 	compute::copy(
 	  this->begin(),
