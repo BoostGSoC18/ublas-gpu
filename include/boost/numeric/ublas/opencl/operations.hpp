@@ -2254,6 +2254,43 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 
 
+  //Norm 1
+
+  /** This function computes ||v||1 on opencl device
+  *
+  * \param v the vector on opencl device which its norm will be computed
+  * \param queue is the command_queue that will execute the operations
+  *
+  * \tparam T is the data type
+  */
+  template<class T>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value ,
+	T>::type norm_1(ublas::vector<T, opencl::storage>& v, compute::command_queue& queue)
+  {
+	return a_sum(v, queue);
+  }
+
+
+  /** This function computes ||v||1 of a vector on host
+  *
+  * \param v the vector on host which its norm will be computed
+  * \param queue is the command_queue that will execute the operations
+  *
+  * \tparam T is the data type
+  */
+  template<class T, class A>
+  typename std::enable_if<std::is_same<T, float>::value |
+	std::is_same<T, double>::value ,
+	T>::type norm_1(ublas::vector<T, A>& v, compute::command_queue& queue)
+  {
+	ublas::vector<T, opencl::storage> vHolder(v, queue);
+
+	return norm_1(vHolder, queue);
+  }
+
+
+
   //Eucledian norm of a vector 
 
   /** This function computes ||v||2 on opencl device
