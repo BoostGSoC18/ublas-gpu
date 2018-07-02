@@ -80,7 +80,7 @@ public:
   */
   matrix()
 	: matrix_container<self_type>(),
-	size1_(0), size2_(0), data_() , device_() {}
+	size1_(0), size2_(0), data_() , device_() , context_() {}
 
 
   /** Dense matrix constructor with size (size1,size2) and resides on memory of device of queue q
@@ -91,7 +91,7 @@ public:
   */
   matrix(size_type size1, size_type size2, compute::context c)
 	: matrix_container<self_type>(),
-	size1_(size1), size2_(size2), device_(c.get_device())
+	size1_(size1), size2_(size2), device_(c.get_device()), context_(c)
   {
 	compute::buffer_allocator<T> allocator(c);
 	data_ = allocator.allocate(layout_type::storage_size(size1, size2)).get_buffer();
@@ -108,7 +108,7 @@ public:
   */
   matrix(size_type size1, size_type size2, const T& value, compute::command_queue &q)
 	: matrix_container<self_type>(),
-	size1_(size1), size2_(size2), device_(q.get_device())
+	size1_(size1), size2_(size2), device_(q.get_device()), context_(q.get_context())
   {
 	compute::buffer_allocator<T> allocator(q.get_context());
 	data_ = allocator.allocate(layout_type::storage_size(size1, size2)).get_buffer();
@@ -128,6 +128,18 @@ public:
 	this->from_host(m, queue);
   }
 
+  //frees the allocated buffer
+  ~matrix()
+  {
+	size_t size = layout_type::storage_size(size1_, size2_);
+
+	if (size > 0)
+	{
+	  compute::buffer_allocator<T> allocator(context_);
+	  allocator.deallocate(data_, size);
+	}
+
+  }
 
   // Accessors
   /** Return the number of rows of the matrix
@@ -234,6 +246,7 @@ private:
   size_type size2_;
   compute::buffer data_;
   compute::device device_;
+  compute::context context_;
 };
 
 
