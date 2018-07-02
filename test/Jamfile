@@ -300,6 +300,19 @@ test-suite numeric/uBLAS
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
       ]
 
-     
+      [ run opencl/norm2_test.cpp
+      : # args
+      : # input files
+      : # requirements
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+      ]
+
+      [ run opencl/elementwise_operations_with_constants_test.cpp
+      : # args
+      : # input files
+      : # requirements
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+      ]
+
 
     ;
