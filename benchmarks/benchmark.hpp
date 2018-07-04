@@ -6,7 +6,8 @@
 // Boost Software License, Version 1.0.
 // (Consult LICENSE or http://www.boost.org/LICENSE_1_0.txt)
 
-#pragma once
+#ifndef BENCHMARKS_UBLAS_HH
+#define BENCHMARKS_UBLAS_HH
 
 #include <iostream>
 #include <chrono>
@@ -26,12 +27,14 @@ public:
   {
     std::cout << "# benchmark : " << name_ << '\n'
               << "# size \ttime (ms)" << std::endl;
+
   }
   virtual void setup(long) {}
   virtual void operation(long) {}
   virtual void teardown() {}
   
   void run(std::vector<long> const &sizes, unsigned times = 10)
+
   {
     print_header();
     for (auto s : sizes)
@@ -43,6 +46,7 @@ public:
       auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(clock::now() - start);
       teardown();
       std::cout << s << '\t' << duration.count()*1./times << std::endl;
+
     }
   }
 private:

@@ -1,12 +1,7 @@
-#define ENABLE_OPENCL
-
 #include <boost/numeric/ublas/matrix.hpp>
 #include "benchmark.hpp"
-#include <new>
 
 namespace ublas = boost::numeric::ublas;
-namespace opencl = boost::numeric::ublas::opencl;
-namespace compute = boost::compute;
 
 template <typename T, typename L>
 class prod_ublas : public benchmark
