@@ -1,0 +1,24 @@
+# bench6 - measure the performance difference between normal prid funvtion and opencl one
+
+import ac ;
+
+using opencl ;
+using clblas ;
+
+exe ublas_prod
+    : ublas_prod.cpp
+    :
+    ;
+
+exe opencl/opencl_prod_without_copying
+    : opencl/opencl_prod_without_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+
+
+exe opencl/opencl_prod_with_copying
+    : opencl/opencl_prod_with_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;

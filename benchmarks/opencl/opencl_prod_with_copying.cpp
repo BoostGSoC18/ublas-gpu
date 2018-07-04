@@ -1,9 +1,7 @@
-
 #define ENABLE_OPENCL
 
 #include <boost/numeric/ublas/matrix.hpp>
-#include "benchmark.hpp"
-#include <new>
+#include "../benchmark.hpp"
 
 namespace ublas = boost::numeric::ublas;
 namespace opencl = boost::numeric::ublas::opencl;
