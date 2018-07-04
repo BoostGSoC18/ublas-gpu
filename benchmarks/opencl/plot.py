@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-
+import sys
 
 def load_and_plot_file(file_name):
     file = open(file_name, "r")
@@ -14,11 +14,10 @@ def load_and_plot_file(file_name):
     plt.plot(x, y, label=file_name)
 
 
-load_and_plot_file("prod opencl with copying data")
-load_and_plot_file("prod opencl without copying data")
-load_and_plot_file("prod ublas")
+for file in sys.argv[1:]:
+    load_and_plot_file(file)
 plt.xlabel('Size')
 plt.ylabel('Time')
-plt.title("Time vs size of prod() function")
+plt.title("Time vs size of function")
 plt.legend()
 plt.show()
