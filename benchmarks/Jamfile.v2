@@ -22,3 +22,22 @@ exe opencl/opencl_prod_with_copying
     :
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
+
+exe ublas_elementwise_operation
+    : ublas_elementwise_operation.cpp
+    :
+    ;
+
+exe opencl/opencl_elementwise_operation_without_copying
+    : opencl/opencl_elementwise_operation_without_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+
+
+exe opencl/opencl_elementwise_operation_with_copying
+    : opencl/opencl_elementwise_operation_with_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+
