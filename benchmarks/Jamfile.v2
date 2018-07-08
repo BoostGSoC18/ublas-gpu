@@ -41,3 +41,21 @@ exe opencl/elementwise_operation_with_copying
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
 
+exe trans
+    : trans.cpp
+    :
+    ;
+
+exe opencl/trans_without_copying
+    : opencl/trans_without_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+
+
+exe opencl/trans_with_copying
+    : opencl/trans_with_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+    
