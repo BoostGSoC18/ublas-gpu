@@ -87,4 +87,5 @@ int main(int argc, char **argv)
     benchmark<std::complex<double>>("std::complex<double>");
   else
     std::cerr << "unsupported value-type \"" << vm["type"].as<std::string>() << '\"' << std::endl;
+
 }
