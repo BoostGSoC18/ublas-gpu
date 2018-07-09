@@ -59,3 +59,20 @@ exe opencl/trans_with_copying
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
     
+exe outer_prod
+    : outer_prod.cpp
+    :
+    ;
+
+exe opencl/outer_prod_without_copying
+    : opencl/outer_prod_without_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+
+
+exe opencl/outer_prod_with_copying
+    : opencl/outer_prod_with_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
