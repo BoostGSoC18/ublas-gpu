@@ -76,3 +76,22 @@ exe opencl/outer_prod_with_copying
     :
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
+
+exe inner_prod
+    : inner_prod.cpp
+    :
+    ;
+
+exe opencl/inner_prod_without_copying
+    : opencl/inner_prod_without_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+
+
+exe opencl/inner_prod_with_copying
+    : opencl/inner_prod_with_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+
