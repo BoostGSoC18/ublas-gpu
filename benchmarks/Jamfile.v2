@@ -95,3 +95,38 @@ exe opencl/inner_prod_with_copying
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
 
+exe norm_1
+    : norm_1.cpp
+    :
+    ;
+
+exe opencl/norm_1_without_copying
+    : opencl/norm_1_without_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+
+
+exe opencl/norm_1_with_copying
+    : opencl/norm_1_with_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+
+exe norm_2
+    : norm_2.cpp
+    :
+    ;
+
+exe opencl/norm_2_without_copying
+    : opencl/norm_2_without_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
+
+
+exe opencl/norm_2_with_copying
+    : opencl/norm_2_with_copying.cpp
+    :
+        [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
+    ;
