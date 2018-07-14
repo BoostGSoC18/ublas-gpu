@@ -81,9 +81,9 @@ prod(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::stor
 
 
   clblasOrder Order = std::is_same<L1, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
-  int lda = Order == clblasRowMajor ? a.size2() : a.size1();
-  int ldb = Order == clblasRowMajor ? b.size2() : a.size2();
-  int ldc = Order == clblasRowMajor ? b.size2() : a.size1();
+  size_t lda = Order == clblasRowMajor ? a.size2() : a.size1();
+  size_t ldb = Order == clblasRowMajor ? b.size2() : a.size2();
+  size_t ldc = Order == clblasRowMajor ? b.size2() : a.size1();
 
 
 
@@ -243,9 +243,9 @@ typename std::enable_if<std::is_same<T, float>::value |
 	cl_event event = NULL;
 
 	clblasOrder Order = std::is_same<L, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
-	int lda = Order == clblasRowMajor ? a.size2() : a.size1();
-	int ldb = Order == clblasRowMajor ? 1 : a.size2();
-	int ldc = Order == clblasRowMajor ? 1 : a.size1();
+	size_t lda = Order == clblasRowMajor ? a.size2() : a.size1();
+	size_t ldb = Order == clblasRowMajor ? 1 : a.size2();
+	size_t ldc = Order == clblasRowMajor ? 1 : a.size1();
 
 
 
@@ -397,9 +397,9 @@ typename std::enable_if<std::is_same<T, float>::value |
 	cl_event event = NULL;
 
 	clblasOrder Order = std::is_same<L, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
-	int lda = Order == clblasRowMajor ? a.size() : 1;
-	int ldb = Order == clblasRowMajor ? b.size2() : a.size();
-	int ldc = Order == clblasRowMajor ? b.size2() : 1;
+	size_t lda = Order == clblasRowMajor ? a.size() : 1;
+	size_t ldb = Order == clblasRowMajor ? b.size2() : a.size();
+	size_t ldc = Order == clblasRowMajor ? b.size2() : 1;
 
 
 
@@ -603,9 +603,9 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 
 	clblasOrder Order = std::is_same<L, ublas::basic_row_major<> >::value ? clblasRowMajor : clblasColumnMajor;
-	int lda = Order == clblasRowMajor ? 1 : a.size();
-	int ldb = Order == clblasRowMajor ? b.size() : 1;
-	int ldc = Order == clblasRowMajor ? b.size() : a.size();
+	size_t lda = Order == clblasRowMajor ? 1 : a.size();
+	size_t ldb = Order == clblasRowMajor ? b.size() : 1;
+	size_t ldc = Order == clblasRowMajor ? b.size() : a.size();
 
 
 
@@ -1951,8 +1951,8 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 	cl_kernel c_kernel = clCreateKernel(program, "transpose", &err);
 
-	int width = std::is_same < L, ublas::basic_row_major<>>::value ? m.size2() : m.size1();
-	int height = std::is_same < L, ublas::basic_row_major<>>::value ? m.size1() : m.size2();
+	size_t width = std::is_same < L, ublas::basic_row_major<>>::value ? m.size2() : m.size1();
+	size_t height = std::is_same < L, ublas::basic_row_major<>>::value ? m.size1() : m.size2();
 
 	size_t global_size[2] = { width , height };
 	clSetKernelArg(c_kernel, 0, sizeof(T*), &m.begin().get_buffer().get());
@@ -2083,8 +2083,8 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 	cl_kernel c_kernel = clCreateKernel(program, "transpose", &err);
 
-	int width = std::is_same < L1, ublas::basic_row_major<>>::value ? m.size2() : m.size1();
-	int height = std::is_same < L1, ublas::basic_row_major<>>::value ? m.size1() : m.size2();
+	size_t width = std::is_same < L1, ublas::basic_row_major<>>::value ? m.size2() : m.size1();
+	size_t height = std::is_same < L1, ublas::basic_row_major<>>::value ? m.size1() : m.size2();
 
 	size_t global_size[2] = { width , height };
 	clSetKernelArg(c_kernel, 0, sizeof(T*), &m.begin().get_buffer().get());
