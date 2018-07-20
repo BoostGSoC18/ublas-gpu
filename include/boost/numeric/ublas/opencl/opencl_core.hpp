@@ -28,13 +28,13 @@ namespace opencl
 
   public:
 
-	///start clBlas (used for the matrix product kernel
+	///start clBlas (opencl backend library)
 	library()
 	{
 	  clblasSetup();
 	}
 
-	/// Finalize clBLAS (used for the matrix product kernel)
+	/// Finalize clBLAS (opencl backend library)
 	~library()
 	{
 	  clblasTeardown();
@@ -58,9 +58,6 @@ namespace opencl
   * the container for column major orientation.
   *
   *
-  * Orientation and storage can also be specified, otherwise a \c row_major and \c unbounded_array are used. It is \b not
-  * required by the storage to initialize elements of the matrix.
-  *
   * \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
   * \tparam L the storage organization. It can be either \c row_major or \c column_major. Default is \c row_major
   */
@@ -83,8 +80,7 @@ public:
 	size1_(0), size2_(0), data_() , device_() , context_() {}
 
 
-  /** Dense matrix constructor with size (size1,size2) and resides on memory of device of queue q
-  * \param q is the boost::compute::command_queue that contains the matrix on its device memory
+  /** Dense matrix constructor with size (size1,size2) and resides on memory of device of context c
   * \param size1 number of rows
   * \param size2 number of columns
   * \param context is the context that the matrix will be stored on
@@ -100,11 +96,10 @@ public:
 
 
   /** Dense matrix constructor with size (size1,size2) and resides on memory of device of queue q and initialize all elements to value
-  * \param 2 is the boost::compute::command_queue that contains the matrix on its device memory
   * \param size1 number of rows
   * \param size2 number of columns
-  * \param q is the command queue of the device which will store the matrix and do the filling
   * \param value is the value that all elements of the matrix are set to
+  * \param q is the command queue of the device which will store the matrix and do the filling
   */
   matrix(size_type size1, size_type size2, const T& value, compute::command_queue &q)
 	: matrix_container<self_type>(),
@@ -185,7 +180,7 @@ public:
   }
 
   /** Copies a matrix to a device
-  * \param m is a matrix that is not on the device _device and it is copied to it
+  * \param m is a matrix that is not on same device and it is copied to it
   * \param queue is the command queue that will execute the operation
   */
   template<class A>
@@ -207,7 +202,7 @@ public:
 
 
   /** Copies a matrix from a device
-  * \param m is a matrix that will be reized to (size1_,size2) and the values of (*this) will be copied in it
+  * \param m is a matrix that the values of (*this) will be copied in it
   * \param queue is the command queue that will execute the operation
   */
   template<class A>
@@ -252,6 +247,15 @@ private:
 
 
 
+
+/** \brief A vector of values of type \c T that resides on a specific device using opencl.
+*
+* this is a special case of class boost::numeric::ublas::vector<T, A> that has A as opencl::storage
+* so it is stored on a specific device and stores some information about this device.
+*
+*
+* \tparam T the type of object stored in the matrix (like double, float, complex, etc...)
+*/
 template <class T>
 class vector<T, opencl::storage> : public boost::compute::vector<T>
 {
@@ -274,8 +278,8 @@ public:
 
   /**vector constructor with size (size) on a specific context and initialize it to a value
   * \param size is the size that will be initially allocated for the vector
-  * \param value is the initial value for all the vector
-  * \param queue is the context that the data will be stored on it context
+  * \param value is the initial value for all the vector lements
+  * \param queue is the command queue that the data will be stored on it context and which will execute the operation
   */
   vector(size_type size,T value, compute::command_queue queue) : compute::vector<T>(size,value,  queue) {
 	queue.finish();
@@ -284,7 +288,7 @@ public:
 
   /**vector constructor that copies a vector on host to device of the queue
   * \param v is the vector to be copied to device
-  * \param queue is the command queue which its device will execute the copying and will have the new vector
+  * \param queue is the command queue which its device will execute the copying and will have the new vector on its device
   */
   template<class A>
   vector(vector<T, A>& v, compute::command_queue& queue) : vector(v.size(), queue.get_context())
@@ -294,7 +298,7 @@ public:
 
 
   /** Return boost::numeri::ublas::opencl::device that has informaton
-  * about the device that the vecutor resides on.
+  * about the device that the vector resides on.
   */
   const compute::device device() const { return device_; }
   compute::device device() { return device_; }
@@ -346,7 +350,7 @@ public:
   }
 
   /**Fill all elements of the vector with the value
-  * \param value value to set all elements of the matrix to
+  * \param value is the value to set all elements of the vector to
   * \param queue is the command queue that will execute the operation
   */
   void fill(T value, compute::command_queue & queue)
