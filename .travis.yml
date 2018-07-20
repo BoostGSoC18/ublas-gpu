@@ -12,7 +12,6 @@ branches:
     - doc
     - ci
     - opencl
-    - working
 
 # env: specifies additional global variables to define per row in build matrix
 env:
