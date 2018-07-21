@@ -28,14 +28,14 @@ namespace compute_lambda = boost::compute::lambda;
 
 //Matrix-Matrix multiplication
 
-/**This function computes the product of 2 matrices (a*b) and stores it at matrix result all 3 matrices are on device
+/**This function computes the product of 2 matrices (a*b) and stores it at matrix result all 3 matrices are on opencl device
 *
-* a and b are originally on device (on the same device) and the result is left on the same device.
+* a and b are originally on  opencl device (on the same device) and the result is left on the same device.
 *
-* \param a matrix A of the product (A*B) that is on device
-* \param b matrix B of the product (A*B) that is on the device
-* \param result matrix on device to store the product of the result of (A*B)
-* \param queue has the queue of the device which has the result matrix and which will do the computation
+* \param a matrix A of the product (A*B) that is on opencl device
+* \param b matrix B of the product (A*B) that is on the same device
+* \param result matrix on the same device to store the result of the product (A*B)
+* \param queue is the command queue of the device which has the result matrix and which will do the computation
 *
 * \tparam T datatype of the matrices
 * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -138,14 +138,14 @@ prod(ublas::matrix<T, L1, opencl::storage>& a, ublas::matrix<T, L2, opencl::stor
 
 
 		
-/**This function computes the product of 2 matrices not on device (a*b) and stores it at matrix result which is also not on device
+/**This function computes the product of 2 matrices on host (a*b) and stores it at matrix result which is also on host
 *
-* a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+* a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to matrix result
 *
-* \param a matrix A of the product (A*B) that is not on device
-* \param b matrix B of the product (A*B) that is not on the device
-* \param result matrix on device to store the product of the result of (A*B)
-* \param queue has the queue of the device which has the result matrix and which will do the computation
+* \param a matrix A of the product (A*B) that is on host
+* \param b matrix B of the product (A*B) that is on host
+* \param result matrix on device to store the result of the product (A*B)
+* \param queue is the command queue of the device which has the result matrix and which will do the computation
 *
 * \tparam T datatype of the matrices
 * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -177,13 +177,13 @@ typename std::enable_if<std::is_same<T, float>::value |
 }
 
 
-/**This function computes the product of 2 matrices not on device (a*b) and stores it at matrix result which is also not on device
+/**This function computes the product of 2 matrices on host (a*b) and stores it at matrix result which is also on host
 *
-* a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+* a and b are originally on host so they are copied to device and the edvice does computatons on them and the result is copied from device and returned
 *
-* \param a matrix A of the product (A*B) that is not on device (it's on the host)
-* \param b matrix B of the product (A*B) that is not on the device (it's on the host)
-* \param queue has the queue of the device which has the result matrix and which will do the computation
+* \param a matrix A of the product (A*B) that is on host 
+* \param b matrix B of the product (A*B) that is on host
+* \param queue is the command queue of the device which has the result matrix and which will do the computation
 *
 * \tparam T datatype of the matrices
 * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -210,14 +210,14 @@ typename std::enable_if<std::is_same<T, float>::value |
 
   //Matrix-vector multiplication
 
-  /**This function computes the product of matrix * vector (a*b) and stores it at vactor result all 3 are on same device
+  /**This function computes the product of matrix * vector (a*b) and stores it at vector result all 3 are on same device
   *
-  * a and b are originally on device (on the same device) and the result is left on the same device.
+  * a and b are originally on opencl device (on the same device) and the result is left on the same device.
   *
   * \param a matrix A of the product (A*B) that is on device
-  * \param b vectoe B of the product (A*B) that is on the device
-  * \param result vector on device to store the product of the result of (A*B)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param b vectoe B of the product (A*B) that is on the same device
+  * \param result vector on device to store the result of the product (A*B)
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype of the data
   * \tparam L layout of the matrix (row_major or column_major)
@@ -297,14 +297,14 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the product of matrix*vector not on device (a*b) and stores it at matrix result which is also not on device
+  /**This function computes the product of matrix*vector on host (a*b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to matrix result
   *
-  * \param a matrix A of the product (A*B) that is not on device
-  * \param b vactor B of the product (A*B) that is not on the device
-  * \param result matrix on device to store the product of the result of (A*B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param a matrix A of the product (A*B) that is on host
+  * \param b vactor B of the product (A*B) that is on host
+  * \param result vector on device to store the result of the product (A*B)
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L layout of the matrices (row_major or column_major)
@@ -335,13 +335,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the product of matrix*vector not on device (a*b) and retirns result vector
+  /**This function computes the product of matrix*vector on host (a*b) and returns result vector
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a matrix A of the product (A*B) that is not on device (it's on host)
-  * \param b vector B of the product (A*B) that is not on device (it's on host)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param a matrix A of the product (A*B) that is on host 
+  * \param b vector B of the product (A*B) that is on host 
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype
   * \tparam L layout of the matrix (row_major or column_major)
@@ -364,14 +364,14 @@ typename std::enable_if<std::is_same<T, float>::value |
 
   //Vector-Matrix multiplication
 
-  /**This function computes the product of vector*matrix (a*b) and stores it at vector result all 3 are on device
+  /**This function computes the product of vector*matrix (a*b) and stores it at vector result all 3 are on opencl device
   *
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a vector A of the product (A*B) that is on device
-  * \param b matrix B of the product (A*B) that is on the device
-  * \param result vector on device to store the product of the result of (A*B)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param b matrix B of the product (A*B) that is on the same device
+  * \param result vector on device to store the result of the product (A*B)
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype 
   * \tparam L layout of the matrix (row_major or column_major)
@@ -453,14 +453,14 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 
 
-  /**This function computes the product of vector*matrix not on device (a*b) and stores it at vector result which is also not on device
+  /**This function computes the product of vector*matrix on host (a*b) and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to vector result
   *
-  * \param a vector A of the product (A*B) that is not on device
-  * \param b matrix B of the product (A*B) that is not on the device
-  * \param result matrix on device to store the product of the result of (A*B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param a vector A of the product (A*B) that is on host
+  * \param b matrix B of the product (A*B) that is on host
+  * \param result vector on device to store the result of the product (A*B)
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype
   * \tparam L layout of the matrix (row_major or column_major)
@@ -491,13 +491,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the product of vector*matrix not on device (a*b) and stores it at matrix result which is also not on device
+  /**This function computes the product of vector*matrix on host (a*b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a vector A of the product (A*B) that is not on device (it's on the host)
-  * \param b matrix B of the product (A*B) that is not on the device (it's on the host)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param a vector A of the product (A*B) that is on host (it's on the host)
+  * \param b matrix B of the product (A*B) that is on host (it's on the host)
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
    * \tparam T datatype
   * \tparam L layout of the matrix (row_major or column_major)
@@ -572,14 +572,14 @@ typename std::enable_if<std::is_same<T, float>::value |
 
   //Outer product
 
-  /**This function computes the outer product of two vectors (a x b) and stores it at vector result all 3 are on device
+  /**This function computes the outer product of two vectors (a x b) and stores it at vector result all 3 are on opencl device
   *
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a vector A of the outer product (A x B) that is on device
-  * \param b vector B of the outer product (A x B) that is on the device
+  * \param b vector B of the outer product (A x B) that is on the same device
   * \param result vector on device to store the result of the outer product
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype
   * \tparam L layout of the matrix (row_major or column_major)
@@ -659,14 +659,14 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 
 
-  /**This function computes the outer product of two vectors on host (a x b) and stores it at vector result which is also not on device
+  /**This function computes the outer product of two vectors on host (a x b) and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to vector result
   *
-  * \param a vector A of the product (A x B) that is not on device
-  * \param b vector B of the product (A x B) that is not on the device
+  * \param a vector A of the product (A x B) that is on host
+  * \param b vector B of the product (A x B) that is on host
   * \param result matrix on device to store the result of the outer product of (A x B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype
   * \tparam L layout of the matrix (row_major or column_major)
@@ -697,13 +697,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the outer product of two vectors not on device (a x b) and stores it at matrix result which is also not on device
+  /**This function computes the outer product of two vectors on host (a x b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a vector A of the product (A x B) that is not on device (it's on the host)
-  * \param b vector B of the product (A x B) that is not on the device (it's on the host)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param a vector A of the product (A x B) that is on host (it's on the host)
+  * \param b vector B of the product (A x B) that is on host (it's on the host)
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype
   * \tparam L layout of the matrix (row_major or column_major)
@@ -741,10 +741,10 @@ typename std::enable_if<std::is_same<T, float>::value |
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a matrix A of the element-wise operation that is on device
-  * \param b matrix B of the element-wise operation that is on the device
+  * \param b matrix B of the element-wise operation that is on the same device
   * \param result matrix on device to store the result
   * \param fun is a boost::compute binary function that is the binary operation that gets executed
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -803,15 +803,15 @@ typename std::enable_if<std::is_same<T, float>::value |
 
 
 
-  /**This function computes an element-wise operation of 2 matrices not on device and stores it at matrix result which is also not on device
+  /**This function computes an element-wise operation of 2 matrices on host and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to matrix result
   *
-  * \param a matrix A of the element-wise operation that is not on device
-  * \param b matrix B of the element-wise operation that is not on the device
+  * \param a matrix A of the element-wise operation that is on host
+  * \param b matrix B of the element-wise operation that is on host
   * \param result matrix on device to store the operation of the result
   * \param fun is a boost::compute binary function that is the binary operation that gets executed
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -836,14 +836,14 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computation element-wise operation of 2 matrices not on device and stores it at matrix result which is also not on device
+  /**This function computation element-wise operation of 2 matrices on host and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a matrix A of the operation that is not on device (it's on the host)
-  * \param b matrix B of the operation that is not on the device (it's on the host)
+  * \param a matrix A of the operation that is on host (it's on the host)
+  * \param b matrix B of the operation that is on host (it's on the host)
   * \param fun is a boost::compute binary function that is the binary operation that gets executed
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -865,10 +865,10 @@ typename std::enable_if<std::is_same<T, float>::value |
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a vector A of the element-wise operation that is on device
-  * \param b vector B of the element-wise operation that is on the device
+  * \param b vector B of the element-wise operation that is on the same device
   * \param result vector on device to store the result
   * \param fun is a boost::compute binary function that is the binary operation that gets executed
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the matrices
@@ -894,15 +894,15 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes an element-wise operation of 2 vectors not on device  and stores it at vector result which is also not on device
+  /**This function computes an element-wise operation of 2 vectors on host  and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to vector result
   *
-  * \param a vector A of the operation that is not on device
-  * \param b vector B of the operation that is not on the device
+  * \param a vector A of the operation that is on host
+  * \param b vector B of the operation that is on host
   * \param result vector on device to store the result
   * \param fun is a boost::compute binary function that is the binary operation that gets executed
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
@@ -928,14 +928,14 @@ typename std::enable_if<std::is_same<T, float>::value |
 
   }
 
-  /**This function computes an element wise operation of 2 vectors not on device and stores it at vector result which is also not on device
+  /**This function computes an element wise operation of 2 vectors on host and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a vector A of the operation that is not on device (it's on the host)
-  * \param b vector B of the operation that is not on the device (it's on the host)
+  * \param a vector A of the operation that is on host (it's on the host)
+  * \param b vector B of the operation that is on host (it's on the host)
   * \param fun is a boost::compute binary function that is the binary operation that gets executed
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
@@ -967,9 +967,9 @@ typename std::enable_if<std::is_same<T, float>::value |
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a matrix A of the summition (A+B) that is on device
-  * \param b matrix B of the summition (A+B) that is on the device
+  * \param b matrix B of the summition (A+B) that is on the same device
   * \param result matrix on device to store the result of (A+B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -982,14 +982,14 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the summition (element-wise) of 2 matrices not on device (a+b) and stores it at matrix result which is also not on device
+  /**This function computes the summition (element-wise) of 2 matrices on host (a+b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to matrix result
   *
-  * \param a matrix A of the summition (A+B) that is not on device
-  * \param b matrix B of the summition (A+B) that is not on the device
+  * \param a matrix A of the summition (A+B) that is on host
+  * \param b matrix B of the summition (A+B) that is on host
   * \param result matrix on device to store the summitiom of the result of (A+B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1003,13 +1003,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the summition (element-wise) of 2 matrices not on device (a+b) and stores it at matrix result which is also not on device
+  /**This function computes the summition (element-wise) of 2 matrices on host (a+b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a matrix A of the summition (A+B) that is not on device (it's on the host)
-  * \param b matrix B of the summition (A+B) that is not on the device (it's on the host)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param a matrix A of the summition (A+B) that is on host (it's on the host)
+  * \param b matrix B of the summition (A+B) that is on host (it's on the host)
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1034,9 +1034,9 @@ typename std::enable_if<std::is_same<T, float>::value |
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a vector A of the summition (A+B) that is on device
-  * \param b vector B of the summition (A+B) that is on the device
+  * \param b vector B of the summition (A+B) that is on the same device
   * \param result vector on device to store the result of (A+B)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype of the vectors
   */
@@ -1047,14 +1047,14 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the summition (element-wise) of 2 vectors not on device (a+b) and stores it at vector result which is also not on device
+  /**This function computes the summition (element-wise) of 2 vectors on host (a+b) and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to vector result
   *
-  * \param a vector A of the summition (A+B) that is not on device
-  * \param b vector B of the summition (A+B) that is not on the device
+  * \param a vector A of the summition (A+B) that is on host
+  * \param b vector B of the summition (A+B) that is on host
   * \param result vector on device to store the summition of the result of (A+B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
@@ -1066,13 +1066,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the summition (element-wise) of 2 vectors not on device (a+b) and stores it at vector result which is also not on device
+  /**This function computes the summition (element-wise) of 2 vectors on host (a+b) and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a vector A of the summition (A+B) that is not on device (it's on the host)
-  * \param b vector B of the summition (A+B) that is not on the device (it's on the host)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param a vector A of the summition (A+B) that is on host (it's on the host)
+  * \param b vector B of the summition (A+B) that is on host (it's on the host)
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
@@ -1095,9 +1095,9 @@ typename std::enable_if<std::is_same<T, float>::value |
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a matrix A of the subtraction (A-B) that is on device
-  * \param b matrix B of the subtraction (A-B) that is on the device
+  * \param b matrix B of the subtraction (A-B) that is on the same device
   * \param result matrix on device to store the result of (A-B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1110,14 +1110,14 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the subtraction (element-wise) of 2 matrices not on device (a-b) and stores it at matrix result which is also not on device
+  /**This function computes the subtraction (element-wise) of 2 matrices on host (a-b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to matrix result
   *
-  * \param a matrix A of the subtraction (A-B) that is not on device
-  * \param b matrix B of the subtraction (A-B) that is not on the device
+  * \param a matrix A of the subtraction (A-B) that is on host
+  * \param b matrix B of the subtraction (A-B) that is on host
   * \param result matrix on device to store the subtraction of the result of (A-B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1131,13 +1131,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the subtraction (element-wise) of 2 matrices not on device (a-b) and stores it at matrix result which is also not on device
+  /**This function computes the subtraction (element-wise) of 2 matrices on host (a-b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a matrix A of the subtraction (A-B) that is not on device (it's on the host)
-  * \param b matrix B of the subtraction (A-B) that is not on the device (it's on the host)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param a matrix A of the subtraction (A-B) that is on host (it's on the host)
+  * \param b matrix B of the subtraction (A-B) that is on host (it's on the host)
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1162,9 +1162,9 @@ typename std::enable_if<std::is_same<T, float>::value |
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a vector A of the subtraction (A-B) that is on device
-  * \param b vector B of the subtraction (A-B) that is on the device
+  * \param b vector B of the subtraction (A-B) that is on the same device
   * \param result vector on device to store the result of (A-B)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype of the vectors
   */
@@ -1175,14 +1175,14 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the subtraction (element-wise) of 2 vectors not on device (a-b) and stores it at vector result which is also not on device
+  /**This function computes the subtraction (element-wise) of 2 vectors on host (a-b) and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to vector result
   *
-  * \param a vector A of the subtraction (A-B) that is not on device
-  * \param b vector B of the subtraction (A-B) that is not on the device
+  * \param a vector A of the subtraction (A-B) that is on host
+  * \param b vector B of the subtraction (A-B) that is on host
   * \param result vector on device to store the subtraction of the result of (A-B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
@@ -1194,13 +1194,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the subtraction (element-wise) of 2 vectors not on device (a-b) and stores it at vector result which is also not on device
+  /**This function computes the subtraction (element-wise) of 2 vectors on host (a-b) and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a vector A of the subtraction (A-B) that is not on device (it's on the host)
-  * \param b vector B of the subtraction (A-B) that is not on the device (it's on the host)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param a vector A of the subtraction (A-B) that is on host (it's on the host)
+  * \param b vector B of the subtraction (A-B) that is on host (it's on the host)
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
@@ -1226,9 +1226,9 @@ typename std::enable_if<std::is_same<T, float>::value |
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a matrix A of the  multiplication (element-wise) (A*B) that is on device
-  * \param b matrix B of the  multiplication (element-wise) (A*B) that is on the device
+  * \param b matrix B of the  multiplication (element-wise) (A*B) that is on the same device
   * \param result matrix on device to store the result of (A*B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1241,14 +1241,14 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the multiplication (element-wise) of 2 matrices not on device (a*b) and stores it at matrix result which is also not on device
+  /**This function computes the multiplication (element-wise) of 2 matrices on host (a*b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to matrix result
   *
-  * \param a matrix A of the  multiplication (element-wise) (A*B) that is not on device
-  * \param b matrix B of the  multiplication (element-wise) (A*B) that is not on the device
+  * \param a matrix A of the  multiplication (element-wise) (A*B) that is on host
+  * \param b matrix B of the  multiplication (element-wise) (A*B) that is on host
   * \param result matrix on device to store the  multiplication (element-wise) of the result of (A*B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1262,13 +1262,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the  multiplication (element-wise) of 2 matrices not on device (a*b) and stores it at matrix result which is also not on device
+  /**This function computes the  multiplication (element-wise) of 2 matrices on host (a*b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a matrix A of the  multiplication (element-wise) (A*B) that is not on device (it's on the host)
-  * \param b matrix B of the  multiplication (element-wise) (A*B) that is not on the device (it's on the host)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param a matrix A of the  multiplication (element-wise) (A*B) that is on host (it's on the host)
+  * \param b matrix B of the  multiplication (element-wise) (A*B) that is on host (it's on the host)
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1292,9 +1292,9 @@ typename std::enable_if<std::is_same<T, float>::value |
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a vector A of the  multiplication (element-wise) (A*B) that is on device
-  * \param b vector B of the  multiplication (element-wise) (A*B) that is on the device
+  * \param b vector B of the  multiplication (element-wise) (A*B) that is on the same device
   * \param result vector on device to store the result of (A*B)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype of the vectors
   */
@@ -1305,14 +1305,14 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the  multiplication (element-wise) of 2 vectors not on device (a*b) and stores it at vector result which is also not on device
+  /**This function computes the  multiplication (element-wise) of 2 vectors on host (a*b) and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to vector result
   *
-  * \param a vector A of the  multiplication (element-wise) (A*B) that is not on device
-  * \param b vector B of the  multiplication (element-wise) (A*B) that is not on the device
+  * \param a vector A of the  multiplication (element-wise) (A*B) that is on host
+  * \param b vector B of the  multiplication (element-wise) (A*B) that is on host
   * \param result vector on device to store the  multiplication (element-wise) of the result of (A*B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
@@ -1324,13 +1324,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the  multiplication (element-wise) of 2 vectors not on device (a*b) and stores it at vector result which is also not on device
+  /**This function computes the  multiplication (element-wise) of 2 vectors on host (a*b) and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a vector A of the  multiplication (element-wise) (A*B) that is not on device (it's on the host)
-  * \param b vector B of the  multiplication (element-wise) (A*B) that is not on the device (it's on the host)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param a vector A of the  multiplication (element-wise) (A*B) that is on host (it's on the host)
+  * \param b vector B of the  multiplication (element-wise) (A*B) that is on host (it's on the host)
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
@@ -1353,9 +1353,9 @@ typename std::enable_if<std::is_same<T, float>::value |
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a matrix A of the  division (element-wise) (A/B) that is on device
-  * \param b matrix B of the  division (element-wise) (A/B) that is on the device
+  * \param b matrix B of the  division (element-wise) (A/B) that is on the same device
   * \param result matrix on device to store the result of (A/B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1368,14 +1368,14 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the division (element-wise) of 2 matrices not on device (a/b) and stores it at matrix result which is also not on device
+  /**This function computes the division (element-wise) of 2 matrices on host (a/b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to matrix result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to matrix result
   *
-  * \param a matrix A of the  division (element-wise) (A/B) that is not on device
-  * \param b matrix B of the  division (element-wise) (A/B) that is not on the device
+  * \param a matrix A of the  division (element-wise) (A/B) that is on host
+  * \param b matrix B of the  division (element-wise) (A/B) that is on host
   * \param result matrix on device to store the  division (element-wise) of the result of (A*B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1389,13 +1389,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the  division (element-wise) of 2 matrices not on device (a/b) and stores it at matrix result which is also not on device
+  /**This function computes the  division (element-wise) of 2 matrices on host (a/b) and stores it at matrix result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a matrix A of the  division (element-wise) (A/B) that is not on device (it's on the host)
-  * \param b matrix B of the  division (element-wise) (A/B) that is not on the device (it's on the host)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param a matrix A of the  division (element-wise) (A/B) that is on host (it's on the host)
+  * \param b matrix B of the  division (element-wise) (A/B) that is on host (it's on the host)
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the matrices
   * \tparam L1 layout of the first matrix matrix (row_major or column_major)
@@ -1419,9 +1419,9 @@ typename std::enable_if<std::is_same<T, float>::value |
   * a and b are originally on device (on the same device) and the result is left on the same device.
   *
   * \param a vector A of the  division (element-wise) (A/B) that is on device
-  * \param b vector B of the  division (element-wise) (A/B) that is on the device
+  * \param b vector B of the  division (element-wise) (A/B) that is on the same device
   * \param result vector on device to store the result of (A/B)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   * \tparam T datatype of the vectors
   */
   template <class T>
@@ -1431,14 +1431,14 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the  division (element-wise) of 2 vectors not on device (a/b) and stores it at vector result which is also not on device
+  /**This function computes the  division (element-wise) of 2 vectors on host (a/b) and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied to vector result
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied to vector result
   *
-  * \param a vector A of the  division (element-wise) (A/B) that is not on device
-  * \param b vector B of the  division (element-wise) (A/B) that is not on the device
+  * \param a vector A of the  division (element-wise) (A/B) that is on host
+  * \param b vector B of the  division (element-wise) (A/B) that is on host
   * \param result vector on device to store the  multiplication (element-wise) of the result of (A/B)
-  * \param queue has the queue of the device which has the result matrix and which will do the computation
+  * \param queue is the command queue of the device which has the result matrix and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
@@ -1450,13 +1450,13 @@ typename std::enable_if<std::is_same<T, float>::value |
   }
 
 
-  /**This function computes the  division (element-wise) of 2 vectors not on device (a/b) and stores it at vector result which is also not on device
+  /**This function computes the  division (element-wise) of 2 vectors on host (a/b) and stores it at vector result which is also on host
   *
-  * a and b are originally not on device so they are copied to device and the evice does computatons on them and the result is copied from device and returned
+  * a and b are originally on host so they are copied to device and the device does computatons on them and the result is copied from device and returned
   *
-  * \param a vector A of the  division (element-wise) (A/B) that is not on device (it's on the host)
-  * \param b vector B of the  division (element-wise) (A/B) that is not on the device (it's on the host)
-  * \param queue has the queue of the device which has the result vector and which will do the computation
+  * \param a vector A of the  division (element-wise) (A/B) that is on host (it's on the host)
+  * \param b vector B of the  division (element-wise) (A/B) that is on host (it's on the host)
+  * \param queue is the command queue of the device which has the result vector and which will do the computation
   *
   * \tparam T datatype of the vectors
   * \tparam A storage type that has the data of the vectors
