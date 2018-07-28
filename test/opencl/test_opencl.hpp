@@ -2,7 +2,7 @@
 #define TEST_OPENCL_HEADER_HH
 #include <stdio.h>
 
-#define ENABLE_OPENCL
+#define BOOST_UBLAS_ENABLE_OPENCL
 #include <boost/numeric/ublas/matrix.hpp>
 #include <time.h>
 #include <math.h>

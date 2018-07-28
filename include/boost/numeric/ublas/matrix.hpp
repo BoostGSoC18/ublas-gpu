@@ -22,7 +22,7 @@
 #include <boost/serialization/array.hpp>
 #include <boost/serialization/nvp.hpp>
 
-#ifdef ENABLE_OPENCL
+#ifdef BOOST_UBLAS_ENABLE_OPENCL
 #include <boost/numeric/ublas/opencl/opencl_core.hpp>
 #include <boost/numeric/ublas/opencl/operations.hpp>
 #endif

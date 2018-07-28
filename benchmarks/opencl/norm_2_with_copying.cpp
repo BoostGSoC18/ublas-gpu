@@ -1,4 +1,4 @@
-#define ENABLE_OPENCL
+#define BOOST_UBLAS_ENABLE_OPENCL
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include "../benchmark.hpp"
