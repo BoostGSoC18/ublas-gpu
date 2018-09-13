@@ -30,6 +30,7 @@ public:
   virtual void operation(long l)
   {
     c = ublas::inner_prod(a, b);
+
   }
 private:
   V1 a;
