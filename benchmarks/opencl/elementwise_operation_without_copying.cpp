@@ -6,6 +6,10 @@
 namespace ublas = boost::numeric::ublas;
 namespace opencl = boost::numeric::ublas::opencl;
 namespace compute = boost::compute;
+namespace benchmark = ublas::benchmark;
+
+
+namespace boost { namespace numeric { namespace ublas { namespace benchmark {
 
 template <typename T, typename L>
 class elementwise_operations_opencl_no_copying : public benchmark
@@ -24,7 +28,7 @@ public:
   }
   virtual void operation(long l)
   {
-	opencl::element_prod(a, b, c, queue);
+	opencl::element_add(a, b, c, queue);
   }
 private:
 
@@ -41,13 +45,16 @@ private:
   opencl::library lib;
 };
 
+}}}}
+
 
 
 int main(int, char **)
 {
   std::vector<long> times({ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192 });
 
-  elementwise_operations_opencl_no_copying<float, ublas::basic_row_major<>> e1;
+  benchmark::elementwise_operations_opencl_no_copying<float, ublas::basic_row_major<>> e1;
   e1.run(times);
 
 }
+

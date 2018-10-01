@@ -8,11 +8,13 @@ def load_and_plot_file(file_path):
     x = [0]
     y = [0]
     for line in file:
-        arr = line.split()
-        size = int(arr[0])
-        time = int(arr[1])
-        x.append(int(size))
-        y.append(int(time))
+        if line.strip()[0] == '#':
+            continue
+        arr = line.split("\t")
+        size = float(arr[0].strip())
+        time = float(arr[1].strip())
+        x.append(float(size))
+        y.append(float(time))
     plt.plot(x, y, label=ntpath.basename(file_path))
 
 

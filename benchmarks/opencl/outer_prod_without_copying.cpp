@@ -7,6 +7,8 @@ namespace ublas = boost::numeric::ublas;
 namespace opencl = boost::numeric::ublas::opencl;
 namespace compute = boost::compute;
 
+namespace boost { namespace numeric { namespace ublas { namespace benchmark {
+
 template <typename T, typename L>
 class outer_prod_opencl_no_copying : public benchmark
 {
@@ -47,12 +49,13 @@ private:
   opencl::library lib;
 };
 
+}}}}
 
 
 int main(int, char **)
 {
   std::vector<long> times({ 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384 });
 
-  outer_prod_opencl_no_copying<float, ublas::basic_row_major<>> o1;
+  benchmark::outer_prod_opencl_no_copying<float, ublas::basic_row_major<>> o1;
   o1.run(times);
 }

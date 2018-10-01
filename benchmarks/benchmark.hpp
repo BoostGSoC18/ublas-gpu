@@ -5,9 +5,7 @@
 // This file is part of Boost.uBLAS. It is made available under the
 // Boost Software License, Version 1.0.
 // (Consult LICENSE or http://www.boost.org/LICENSE_1_0.txt)
-
-#ifndef BENCHMARKS_UBLAS_HH
-#define BENCHMARKS_UBLAS_HH
+#pragma once
 
 #include <iostream>
 #include <chrono>
@@ -54,3 +52,4 @@ private:
 };
 
 }}}}
+

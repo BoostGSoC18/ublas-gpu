@@ -5,10 +5,12 @@ import ac ;
 using opencl ;
 using clblas ;
 
-exe prod
-    : prod.cpp
-    :
+project boost/ublas/benchmarks
+    : requirements <library>/boost/program_options//boost_program_options
     ;
+
+exe mm_prod : mm_prod.cpp ;
+exe mv_prod : mv_prod.cpp ;
 
 exe opencl/prod_without_copying
     : opencl/prod_without_copying.cpp
@@ -23,10 +25,7 @@ exe opencl/prod_with_copying
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
 
-exe elementwise_operation
-    : elementwise_operation.cpp
-    :
-    ;
+exe add : add.cpp ;
 
 exe opencl/elementwise_operation_without_copying
     : opencl/elementwise_operation_without_copying.cpp
@@ -41,10 +40,6 @@ exe opencl/elementwise_operation_with_copying
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
 
-exe trans
-    : trans.cpp
-    :
-    ;
 
 exe opencl/trans_without_copying
     : opencl/trans_without_copying.cpp
@@ -59,10 +54,7 @@ exe opencl/trans_with_copying
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
     
-exe outer_prod
-    : outer_prod.cpp
-    :
-    ;
+exe outer_prod : outer_prod.cpp ;
 
 exe opencl/outer_prod_without_copying
     : opencl/outer_prod_without_copying.cpp
@@ -77,10 +69,8 @@ exe opencl/outer_prod_with_copying
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
 
-exe inner_prod
-    : inner_prod.cpp
-    :
-    ;
+exe inner_prod : inner_prod.cpp ;
+
 
 exe opencl/inner_prod_without_copying
     : opencl/inner_prod_without_copying.cpp
@@ -95,10 +85,6 @@ exe opencl/inner_prod_with_copying
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
 
-exe norm_1
-    : norm_1.cpp
-    :
-    ;
 
 exe opencl/norm_1_without_copying
     : opencl/norm_1_without_copying.cpp
@@ -113,10 +99,6 @@ exe opencl/norm_1_with_copying
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
 
-exe norm_2
-    : norm_2.cpp
-    :
-    ;
 
 exe opencl/norm_2_without_copying
     : opencl/norm_2_without_copying.cpp
@@ -131,3 +113,9 @@ exe opencl/norm_2_with_copying
         [ ac.check-library /clblas//clblas : <library>/clblas//clblas <library>/opencl//opencl : <build>no ]
     ;
     
+
+exe reference/add : reference/add.cpp ;
+exe reference/mm_prod : reference/mm_prod.cpp ;
+exe reference/mv_prod : reference/mv_prod.cpp ;
+exe reference/inner_prod : reference/inner_prod.cpp ;
+exe reference/outer_prod : reference/outer_prod.cpp ;
