@@ -6,6 +6,7 @@
 namespace ublas = boost::numeric::ublas;
 namespace opencl = boost::numeric::ublas::opencl;
 namespace compute = boost::compute;
+namespace benchmark = ublas::benchmark;
 
 namespace boost { namespace numeric { namespace ublas { namespace benchmark {
 
