@@ -6,7 +6,7 @@ using opencl ;
 using clblas ;
 
 project boost/ublas/benchmarks
-    : requirements <library>/boost/program_options//boost_program_options
+    : requirements <library>/boost/program_options//boost_program_options <toolset>gcc:<cxxflags>-Wno-ignored-attributes
     ;
 
 exe mm_prod : mm_prod.cpp ;
